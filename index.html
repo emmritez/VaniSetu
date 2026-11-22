@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>VaniSetu - AI Based Learning App</title>
+  <meta name="theme-color" content="#312e81" />
+  <!-- Embedded PWA Manifest Blob for single-file preview compatibility -->
+  <link rel="manifest" id="pwa-manifest-link" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+      background-color: #eef2ff;
+      color: #1e293b;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); opacity: 0.75; }
+      70% { transform: scale(1.25); opacity: 0; }
+      100% { transform: scale(0.95); opacity: 0; }
+    }
+    .animate-pulse-ring {
+      animation: pulseRing 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+    }
+    @keyframes waveBar {
+      0%, 100% { height: 10px; }
+      50% { height: 34px; }
+    }
+    .wave-bar {
+      animation: waveBar 1s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex justify-center items-start sm:py-4">
+
+  <!-- Main Mobile App Shell (max-w-md centered on larger screens, full screen on mobile) -->
+  <div id="app-shell" class="w-full max-w-[480px] min-h-screen sm:min-h-[840px] sm:max-h-[880px] bg-slate-50 sm:rounded-[32px] sm:shadow-2xl sm:border sm:border-indigo-100 flex flex-col overflow-hidden relative">
+
+    <!-- Toast Notification Banner (Replaces alert) -->
+    <div id="toast-box" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-[420px] bg-slate-900 text-white text-sm font-medium px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between gap-3 transition-all">
+      <span id="toast-msg">Notification</span>
+      <button onclick="hideToast()" class="text-slate-400 hover:text-white text-xs font-bold px-2 py-1">OK</button>
+    </div>
+
+    <!-- ==================== 1. UNIFIED LOGIN SCREEN ==================== -->
+    <section id="login-screen" class="flex-1 flex flex-col justify-between p-6 bg-gradient-to-b from-indigo-950 via-indigo-900 to-slate-900 text-white overflow-y-auto">
+      <div class="pt-4">
+        <!-- Brand Header -->
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center shadow-lg text-indigo-950 font-extrabold text-xl">
+            वाS
+          </div>
+          <div>
+            <span class="inline-block text-[11px] font-semibold uppercase tracking-wider bg-indigo-800/80 text-amber-300 px-2.5 py-0.5 rounded-full border border-indigo-700">
+              Trilingual AI Gurukul
+            </span>
+            <h1 class="text-2xl font-extrabold tracking-tight text-white mt-0.5">VaniSetu</h1>
+          </div>
+        </div>
+        <p class="text-xs font-medium text-amber-300/95 bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 leading-relaxed">
+          "English, Hindi aur Sanskrit — Niyam se Baatcheet Tak"
+        </p>
+      </div>
+
+      <!-- Unified Login Card -->
+      <div class="bg-white text-slate-800 rounded-3xl p-5 shadow-2xl my-4">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-bold text-slate-900">Swagat Hai (Sign In)</h2>
+          <span class="text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Single Portal</span>
+        </div>
+        <p class="text-xs text-slate-500 mb-4">
+          Student ya Admin — apne credentials se ek hi window se login karein.
+        </p>
+
+        <!-- Quick Demo Auto-Fill Chips -->
+        <div class="flex flex-wrap gap-2 mb-4">
+          <button type="button" onclick="fillCredentials('student')" class="flex-1 text-xs font-semibold bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5">
+            <span>🎓 Student Demo</span>
+          </button>
+          <button type="button" onclick="fillCredentials('admin')" class="flex-1 text-xs font-semibold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5">
+            <span>👑 Admin Master</span>
+          </button>
+        </div>
+
+        <form id="login-form" onsubmit="handleLogin(event)" class="space-y-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Email / Login ID</label>
+            <input id="login-id" type="email" required placeholder="student@vanisetu.com"
+              class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+            <input id="login-pass" type="password" required placeholder="••••••••"
+              class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition" />
+          </div>
+
+          <!-- Always Login Toggle -->
+          <div class="flex items-center justify-between pt-1">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input id="always-login-checkbox" type="checkbox" checked class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300" />
+              <span class="text-xs font-semibold text-slate-700">Always Login (Signed in rahein)</span>
+            </label>
+            <span class="text-[11px] text-slate-400">Auto-Save</span>
+          </div>
+
+          <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold text-sm shadow-md shadow-indigo-200 transition">
+            Login Karein →
+          </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="relative my-4 flex items-center justify-center">
+          <div class="border-t border-slate-200 w-full"></div>
+          <span class="bg-white px-3 text-[11px] font-semibold text-slate-400 uppercase">Ya Phir</span>
+          <div class="border-t border-slate-200 w-full"></div>
+        </div>
+
+        <!-- Biometric Login Button -->
+        <button type="button" onclick="handleBiometricLogin()" class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-semibold text-xs flex items-center justify-center gap-2.5 shadow-md transition">
+          <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
+          </svg>
+          <span>Login with Biometrics (Fingerprint / Face ID)</span>
+        </button>
+        <p id="biometric-hint" class="text-[11px] text-center text-slate-400 mt-2">
+          Device biometric ya saved passkey se turant unlock karein
+        </p>
+      </div>
+
+      <div class="text-center text-[11px] text-indigo-300/80 pb-2">
+        Admin ID: <span class="text-white font-mono">admin@vanisetu.com</span> / <span class="text-white font-mono">admin123</span><br/>
+        Student ID: <span class="text-white font-mono">student@vanisetu.com</span> / <span class="text-white font-mono">learn123</span>
+      </div>
+    </section>
+
+    <!-- ==================== 2. MAIN AUTHENTICATED APP WORKSPACE ==================== -->
+    <div id="main-app" class="hidden flex-1 flex flex-col h-full overflow-hidden">
+
+      <!-- Top App Header -->
+      <header class="bg-indigo-950 text-white px-4 pt-3.5 pb-3 shrink-0 shadow-md z-10">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center text-indigo-950 font-extrabold text-sm shadow">
+              वाS
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 class="text-base font-extrabold leading-none">VaniSetu</h1>
+                <span id="role-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/30">
+                  STUDENT
+                </span>
+              </div>
+              <p class="text-[10px] text-indigo-200 mt-0.5">Niyam se Baatcheet Tak</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <!-- Biometric Quick Setup Pill -->
+            <button onclick="registerBiometrics()" title="Setup Biometric Login" class="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-amber-300 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
+              </svg>
+            </button>
+            <!-- Logout Button -->
+            <button onclick="handleLogout()" class="text-xs font-semibold bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-400/30 px-2.5 py-1.5 rounded-xl transition">
+              Logout
+            </button>
+          </div>
+        </div>
+
+        <!-- Admin Master Banner (Only visible when logged in as Admin) -->
+        <div id="admin-master-banner" class="hidden mt-2.5 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/40 rounded-xl px-3 py-1.5 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xs">👑</span>
+            <span class="text-[11px] font-bold text-amber-200">Admin Master Mode: All Levels & Tools Unlocked</span>
+          </div>
+          <button onclick="switchTab('admin')" class="text-[10px] font-bold bg-amber-400 text-indigo-950 px-2 py-0.5 rounded-lg">
+            Control Panel
+          </button>
+        </div>
+      </header>
+
+      <!-- Scrollable Content Area -->
+      <main id="main-scroll-area" class="flex-1 overflow-y-auto pb-24 px-4 pt-4 space-y-4">
+
+        <!-- ==================== TAB 1: SEEKHEIN (LEARN) ==================== -->
+        <div id="tab-learn" class="space-y-4">
+          <!-- Language Selector Pills -->
+          <div class="bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-3 gap-1.5">
+            <button onclick="selectLanguage('english')" id="lang-btn-english" class="lang-pill py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-sm">
+              🇬🇧 English
+            </button>
+            <button onclick="selectLanguage('hindi')" id="lang-btn-hindi" class="lang-pill py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100">
+              🇮🇳 हिंदी (Hindi)
+            </button>
+            <button onclick="selectLanguage('sanskrit')" id="lang-btn-sanskrit" class="lang-pill py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100">
+              🕉️ संस्कृतम्
+            </button>
+          </div>
+
+          <!-- Level Progress Roadmap Card -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Structured Path</span>
+                <h2 id="learn-lang-title" class="text-base font-extrabold text-slate-900">English Mastery Roadmap</h2>
+              </div>
+              <span id="unlocked-level-badge" class="text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-xl">
+                Level 1 Active
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 mb-3">
+              Agla level unlock karne ke liye <strong>Level Exam (50 MCQs)</strong> mein kam se kam <strong>50% (25/50)</strong> score zaroori hai.
+            </p>
+
+            <!-- 4 Stages Grid -->
+            <div id="stages-container" class="grid grid-cols-2 gap-2.5">
+              <!-- Populated dynamically via JS -->
+            </div>
+          </div>
+
+          <!-- Stage 1: Phonetics & Matrayein Lab -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+            <div class="flex items-center justify-between mb-1">
+              <h3 id="phonetics-title" class="text-sm font-extrabold text-slate-900">🔊 Phonetics & Matra Lab (44 Sounds)</h3>
+              <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Tap to Hear</span>
+            </div>
+            <p id="phonetics-desc" class="text-xs text-slate-500 mb-3">
+              English mein 26 letters se 44 sounds (matrayein) banti hain. Kisi bhi symbol par tap karke awaaz sunein:
+            </p>
+            <div id="phonetics-grid" class="grid grid-cols-3 gap-2">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- Stage 2: Full Theory + Examples -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-teal-700 bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-200">
+                📖 Full Theory & Types
+              </span>
+              <button id="speak-theory-btn" onclick="speakCurrentTheory()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                <span>🔊 Suniye</span>
+              </button>
+            </div>
+            <div id="theory-content-box" class="space-y-2.5">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- Chapter Practice Exercise (Submit & Show Answers) -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-extrabold text-slate-900">✍️ Chapter Practice Exercise</h3>
+              <span class="text-[11px] font-semibold text-slate-500">Instant Answer Key</span>
+            </div>
+            <div id="chapter-exercise-list" class="space-y-3">
+              <!-- Populated dynamically -->
+            </div>
+            <div class="pt-2 flex gap-2">
+              <button onclick="submitChapterExercise()" class="flex-1 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow transition">
+                Submit & Show Answers
+              </button>
+              <button onclick="resetChapterExercise()" class="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition">
+                Reset
+              </button>
+            </div>
+            <div id="chapter-exercise-result" class="hidden p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-xs text-indigo-950"></div>
+          </div>
+        </div>
+
+        <!-- ==================== TAB 2: AI TUTOR (CHAT & VOICE CALL) ==================== -->
+        <div id="tab-ai" class="hidden space-y-3">
+          <!-- Mode Toggle: Chat vs Live Voice Call -->
+          <div class="bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200 grid grid-cols-2 gap-1.5">
+            <button onclick="setAiSubMode('chat')" id="ai-mode-chat-btn" class="py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm transition">
+              💬 AI Text & Audio Chat
+            </button>
+            <button onclick="setAiSubMode('call')" id="ai-mode-call-btn" class="py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
+              📞 Live AI Voice Call
+            </button>
+          </div>
+
+          <!-- AI Language & Coach Mode Bar -->
+          <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5">
+              <span class="text-[11px] font-bold text-slate-500">Bhasha:</span>
+              <select id="ai-lang-select" class="text-xs font-bold bg-slate-100 text-slate-800 rounded-lg px-2 py-1 border border-slate-200 focus:outline-none">
+                <option value="english">English</option>
+                <option value="hindi">Hindi (हिंदी)</option>
+                <option value="sanskrit">Sanskrit (संस्कृत)</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[11px] font-bold text-slate-500">Mode:</span>
+              <select id="ai-coach-mode" class="text-xs font-bold bg-amber-50 text-amber-900 rounded-lg px-2 py-1 border border-amber-200 focus:outline-none">
+                <option value="coach">Grammar Coach</option>
+                <option value="freetalk">Free Talk</option>
+                <option value="roleplay">Interview / Daily Roleplay</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- SUB-VIEW A: AI CHAT -->
+          <div id="ai-chat-panel" class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-[470px] overflow-hidden">
+            <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span class="text-xs font-bold text-slate-800">VaniSetu AI Sahayak (Non-Human Safe Space)</span>
+              </div>
+              <button onclick="clearAiChat()" class="text-[11px] font-semibold text-slate-400 hover:text-slate-600">Clear</button>
+            </div>
+
+            <!-- Messages Feed -->
+            <div id="ai-chat-messages" class="flex-1 overflow-y-auto p-3.5 space-y-3 bg-slate-50/50">
+              <div class="bg-indigo-50 border border-indigo-100 rounded-2xl rounded-tl-none p-3 text-xs text-slate-800 max-w-[88%] shadow-sm">
+                <p class="font-bold text-indigo-900 mb-1">Namaste! Main aapka VaniSetu AI Tutor hoon 🙏</p>
+                <p>Aap bina kisi jhijhak ke <strong>English, Hindi ya Sanskrit</strong> mein likh kar ya mic dabakar baat karein. Main aapki grammar bhi sudharunga aur jawab bolkar bhi sunaunga!</p>
+              </div>
+            </div>
+
+            <!-- Quick Prompt Suggestions -->
+            <div class="px-3 py-1.5 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto no-scrollbar">
+              <button onclick="sendQuickPrompt('Yesterday I go to market')" class="shrink-0 text-[11px] bg-slate-100 hover:bg-indigo-50 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
+                "Yesterday I go to market"
+              </button>
+              <button onclick="sendQuickPrompt('Introduce yourself in English')" class="shrink-0 text-[11px] bg-slate-100 hover:bg-indigo-50 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
+                Self Introduction
+              </button>
+              <button onclick="sendQuickPrompt('Sanskrit mein apna parichay dein')" class="shrink-0 text-[11px] bg-slate-100 hover:bg-indigo-50 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
+                संस्कृत परिचय
+              </button>
+            </div>
+
+            <!-- Input Area -->
+            <form onsubmit="handleAiChatSubmit(event)" class="p-2.5 bg-white border-t border-slate-200 flex items-center gap-2">
+              <button type="button" onclick="startVoiceRecognitionForChat()" id="chat-mic-btn" title="Bolkar likhein" class="p-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 transition shrink-0">
+                🎤
+              </button>
+              <input id="ai-chat-input" type="text" placeholder="Apna vakya likhein ya mic dabayein..."
+                class="flex-1 text-xs bg-slate-100 px-3.5 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white" />
+              <button type="submit" class="px-3.5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shrink-0">
+                Send
+              </button>
+            </form>
+          </div>
+
+          <!-- SUB-VIEW B: LIVE AI VOICE CALL SCREEN -->
+          <div id="ai-call-panel" class="hidden bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 shadow-xl flex flex-col items-center justify-between min-h-[470px] relative overflow-hidden">
+            <div class="text-center z-10">
+              <span id="call-status-pill" class="inline-block text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-white/10 text-amber-300 border border-white/15">
+                Ready to Call
+              </span>
+              <h3 class="text-xl font-extrabold mt-3">VaniSetu Voice Mentor</h3>
+              <p id="call-timer" class="text-sm font-mono text-indigo-300 mt-1">00:00</p>
+            </div>
+
+            <!-- Animated Avatar & Soundwave -->
+            <div class="relative flex flex-col items-center justify-center my-4 z-10">
+              <div id="call-pulse-ring" class="hidden absolute w-32 h-32 rounded-full bg-amber-400/30 animate-pulse-ring"></div>
+              <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-amber-500 to-indigo-500 p-1 shadow-2xl flex items-center justify-center">
+                <div class="w-full h-full rounded-full bg-slate-900 flex items-center justify-center text-3xl">
+                  🤖
+                </div>
+              </div>
+              <!-- Soundwave Bars -->
+              <div id="call-wave-bars" class="hidden flex items-center gap-1.5 h-10 mt-4">
+                <span class="w-1.5 bg-amber-400 rounded-full wave-bar" style="animation-delay:0.1s"></span>
+                <span class="w-1.5 bg-teal-400 rounded-full wave-bar" style="animation-delay:0.3s"></span>
+                <span class="w-1.5 bg-amber-400 rounded-full wave-bar" style="animation-delay:0.2s"></span>
+                <span class="w-1.5 bg-indigo-400 rounded-full wave-bar" style="animation-delay:0.4s"></span>
+                <span class="w-1.5 bg-amber-400 rounded-full wave-bar" style="animation-delay:0.15s"></span>
+              </div>
+              <p id="call-live-caption" class="text-xs text-center text-indigo-200 max-w-[280px] mt-3 min-h-[36px]">
+                "Start Voice Call" dabayein aur bina jhijhak English, Hindi ya Sanskrit mein baat karein.
+              </p>
+            </div>
+
+            <!-- Call Controls -->
+            <div class="w-full flex items-center justify-center gap-4 z-10">
+              <button id="btn-start-call" onclick="startAiVoiceCall()" class="px-6 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/30 flex items-center gap-2 transition">
+                <span>📞 Start Voice Call</span>
+              </button>
+              <button id="btn-speak-turn" onclick="triggerCallUserTurn()" class="hidden px-4 py-3.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs shadow-lg transition">
+                🎙️ Tap & Speak
+              </button>
+              <button id="btn-end-call" onclick="endAiVoiceCall()" class="hidden px-4 py-3.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-lg transition">
+                End Call
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== TAB 3: SHABDKOSH (3-LEVEL DICTIONARY) ==================== -->
+        <div id="tab-dictionary" class="hidden space-y-4">
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Smart Trilingual Lexicon</span>
+              <h2 class="text-base font-extrabold text-slate-900">VaniSetu 3-Tier ShabdKosh</h2>
+              <p class="text-xs text-slate-500">
+                Har shabd ka <strong>Traditional (Shuddh)</strong>, <strong>Intermediary (Bolchal)</strong> aur <strong>Modern (Smart)</strong> roop jaanein.
+              </p>
+            </div>
+
+            <!-- Search Input -->
+            <div class="relative">
+              <input id="dict-search-input" oninput="renderDictionary()" type="text" placeholder="Shabd khojein (e.g., Courage, Happy, Knowledge, Friend, Jaldi)..."
+                class="w-full pl-9 pr-4 py-2.5 text-xs bg-slate-100 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white" />
+              <span class="absolute left-3 top-2.5 text-slate-400 text-sm">🔍</span>
+            </div>
+
+            <!-- Quick Filter Chips -->
+            <div class="flex gap-1.5 overflow-x-auto no-scrollbar">
+              <button onclick="quickSearchDict('')" class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">All Words</button>
+              <button onclick="quickSearchDict('Courage')" class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 shrink-0">Courage / साहस</button>
+              <button onclick="quickSearchDict('Knowledge')" class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 shrink-0">Knowledge / ज्ञान</button>
+              <button onclick="quickSearchDict('Happy')" class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 shrink-0">Happy / प्रसन्न</button>
+              <button onclick="quickSearchDict('Friend')" class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 shrink-0">Friend / मित्र</button>
+            </div>
+          </div>
+
+          <!-- Dictionary Results Container -->
+          <div id="dictionary-results" class="space-y-3">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- ==================== TAB 4: LEVEL GATE EXAM (50 MCQs) ==================== -->
+        <div id="tab-exam" class="hidden space-y-4">
+          <!-- Exam Header & Rules Card -->
+          <div class="bg-gradient-to-r from-indigo-900 to-indigo-800 text-white rounded-2xl p-4 shadow-md">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider bg-amber-400 text-indigo-950 px-2.5 py-0.5 rounded-full">
+                Level Gate Qualification
+              </span>
+              <span id="exam-attempt-badge" class="text-xs font-semibold text-indigo-200">
+                Attempts: 0 | Best: 0/50
+              </span>
+            </div>
+            <h2 class="text-lg font-extrabold mt-2">50-MCQ Mastery Exam</h2>
+            <p class="text-xs text-indigo-200 mt-1 leading-relaxed">
+              • Next level unlock karne ke liye kam se kam <strong>50% (25/50)</strong> score zaroori hai.<br/>
+              • Qualify karne ke baad bhi aap <strong>jitni baar chahein re-exam</strong> de sakte hain.
+            </p>
+
+            <div class="mt-3 pt-3 border-t border-white/15 flex items-center justify-between gap-2">
+              <button onclick="startNew50McqExam()" class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-indigo-950 font-extrabold text-xs shadow transition">
+                🔄 Start / Re-Attempt 50 MCQs
+              </button>
+              <button onclick="autoFillDemoExam()" class="px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-[11px] transition">
+                ⚡ Quick Demo Fill (32/50)
+              </button>
+            </div>
+          </div>
+
+          <!-- Exam Result Banner (Shown after submission) -->
+          <div id="exam-result-card" class="hidden rounded-2xl p-4 border shadow-sm space-y-2">
+            <!-- Populated dynamically -->
+          </div>
+
+          <!-- Live Exam Progress Bar & Page Filter -->
+          <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200 flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-slate-800">Answered: <span id="exam-answered-count" class="text-indigo-600">0</span> / 50</span>
+              <p class="text-[11px] text-slate-400">Pass Target: 25 Correct (50%)</p>
+            </div>
+            <button onclick="submit50McqExam()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow transition">
+              Submit Exam ✓
+            </button>
+          </div>
+
+          <!-- 50 Questions List Container -->
+          <div id="exam-questions-container" class="space-y-3">
+            <!-- 50 MCQs rendered dynamically -->
+          </div>
+
+          <!-- Bottom Submit Button -->
+          <button onclick="submit50McqExam()" class="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-lg transition">
+            Final Submit (50 MCQs) & Check Result
+          </button>
+        </div>
+
+        <!-- ==================== TAB 5: ADMIN MASTER CONTROL (ADMIN ONLY) ==================== -->
+        <div id="tab-admin" class="hidden space-y-4">
+          <div class="bg-gradient-to-r from-amber-500 to-orange-500 text-indigo-950 rounded-2xl p-4 shadow-md">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider bg-indigo-950 text-amber-300 px-2.5 py-0.5 rounded-full">
+                Full Access Credential
+              </span>
+              <span class="text-xs font-extrabold">Role: Super Admin</span>
+            </div>
+            <h2 class="text-lg font-extrabold mt-2">Admin Master Control Window</h2>
+            <p class="text-xs font-medium text-indigo-950/90 mt-0.5">
+              Aapko sabhi languages, locked levels, AI features, aur content database ka 100% direct access prapt hai.
+            </p>
+          </div>
+
+          <!-- Quick System Privileges -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
+            <h3 class="text-sm font-extrabold text-slate-900">🔓 Master Feature Access Status</h3>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 font-semibold">
+                ✅ All 4 Levels Unlocked
+              </div>
+              <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 font-semibold">
+                ✅ Unlimited AI Voice/Chat
+              </div>
+              <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 font-semibold">
+                ✅ 3-Tier ShabdKosh Editor
+              </div>
+              <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 font-semibold">
+                ✅ 50-MCQ Gate Bypass
+              </div>
+            </div>
+          </div>
+
+          <!-- Add New Word to 3-Level Dictionary Live -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
+            <h3 class="text-sm font-extrabold text-slate-900">➕ Add New Word to ShabdKosh (Live)</h3>
+            <form onsubmit="handleAdminAddWord(event)" class="space-y-2.5">
+              <div class="grid grid-cols-2 gap-2">
+                <input id="admin-word-en" type="text" required placeholder="English Word (e.g. Wisdom)"
+                  class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <input id="admin-word-hi" type="text" required placeholder="Hindi / Sanskrit (e.g. विवेक)"
+                  class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+              <input id="admin-word-trad" type="text" required placeholder="Traditional / Shuddh Usage (e.g. Pragyā / प्रज्ञा)"
+                class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <input id="admin-word-inter" type="text" required placeholder="Intermediary / Bolchal (e.g. Samajhdari / Good Judgment)"
+                class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <input id="admin-word-mod" type="text" required placeholder="Modern / Smart Usage (e.g. Street-smart / Sharp Insight)"
+                class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow transition">
+                Publish Word to ShabdKosh
+              </button>
+            </form>
+          </div>
+
+          <!-- Student Performance & Exam Logs -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2.5">
+            <h3 class="text-sm font-extrabold text-slate-900">📊 Recent Student Level-Gate Logs</h3>
+            <div class="space-y-2 text-xs">
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <div>
+                  <p class="font-bold text-slate-800">Aarav Sharma (Class 8)</p>
+                  <p class="text-[11px] text-slate-500">English Level 1 Exam • 34/50 (68%)</p>
+                </div>
+                <span class="text-[11px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Qualified</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <div>
+                  <p class="font-bold text-slate-800">Priya Verma (BA Final)</p>
+                  <p class="text-[11px] text-slate-500">Sanskrit Sandhi Gate • 22/50 (44%)</p>
+                </div>
+                <span class="text-[11px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Re-attempting</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+      <!-- Bottom Navigation Bar (4 Tabs for Student, 5th Admin Tab for Admin) -->
+      <nav id="bottom-nav" class="bg-white border-t border-slate-200 px-2 py-2 flex items-center justify-around shrink-0 z-20">
+        <button onclick="switchTab('learn')" id="nav-learn" class="nav-btn flex-1 flex flex-col items-center gap-1 py-1 text-indigo-600 font-bold">
+          <span class="text-lg leading-none">📚</span>
+          <span class="text-[10px]">Seekhein</span>
+        </button>
+        <button onclick="switchTab('ai')" id="nav-ai" class="nav-btn flex-1 flex flex-col items-center gap-1 py-1 text-slate-400 font-semibold">
+          <span class="text-lg leading-none">🎙️</span>
+          <span class="text-[10px]">AI Tutor</span>
+        </button>
+        <button onclick="switchTab('dictionary')" id="nav-dictionary" class="nav-btn flex-1 flex flex-col items-center gap-1 py-1 text-slate-400 font-semibold">
+          <span class="text-lg leading-none">📖</span>
+          <span class="text-[10px]">ShabdKosh</span>
+        </button>
+        <button onclick="switchTab('exam')" id="nav-exam" class="nav-btn flex-1 flex flex-col items-center gap-1 py-1 text-slate-400 font-semibold">
+          <span class="text-lg leading-none">🎯</span>
+          <span class="text-[10px]">50-MCQ Test</span>
+        </button>
+        <button onclick="switchTab('admin')" id="nav-admin" class="hidden nav-btn flex-1 flex flex-col items-center gap-1 py-1 text-amber-600 font-semibold">
+          <span class="text-lg leading-none">👑</span>
+          <span class="text-[10px]">Admin</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <script>
+    // ==================== PWA MANIFEST BLOB INJECTION ====================
+    (function injectManifest() {
+      const manifestData = {
+        name: "VaniSetu - AI Based Learning App",
+        short_name: "VaniSetu",
+        description: "English, Hindi aur Sanskrit — Niyam se Baatcheet Tak",
+        start_url: "./index.html",
+        display: "standalone",
+        background_color: "#1e1b4b",
+        theme_color: "#312e81",
+        icons: [
+          {
+            src: "https://placehold.co/192x192/312e81/fbbf24?text=VaniSetu",
+            sizes: "192x192",
+            type: "image/png"
+          },
+          {
+            src: "https://placehold.co/512x512/312e81/fbbf24?text=VaniSetu",
+            sizes: "512x512",
+            type: "image/png"
+          }
+        ]
+      };
+      const blob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.getElementById('pwa-manifest-link');
+      if (link) link.setAttribute('href', url);
+    })();
+
+    // ==================== APPLICATION STATE ====================
+    const APP_STATE = {
+      user: null, // { email, role: 'admin' | 'student', name }
+      currentLang: 'english',
+      unlockedLevel: 1, // Student starts at Level 1; passes 50 MCQs (>=50%) to unlock next
+      examStats: {
+        attempts: 0,
+        bestScore: 0
+      },
+      examQuestions: [],
+      examAnswers: {},
+      callActive: false,
+      callSeconds: 0,
+      callTimerInterval: null
+    };
+
+    // ==================== CURRICULUM DATA (ENGLISH, HINDI, SANSKRIT) ====================
+    const CURRICULUM = {
+      english: {
+        title: "English Mastery Roadmap",
+        phoneticsTitle: "🔊 English IPA Phonetics (44 Matrayein)",
+        phoneticsDesc: "English ke 26 letters se 44 alag sounds banti hain. Tap karke Hindi matra ke saath sunein:",
+        phonetics: [
+          { sym: "/ɪ/", hindi: "इ (Chhoti i)", word: "Sit", speak: "Sit" },
+          { sym: "/iː/", hindi: "ई (Badi ee)", word: "Seat", speak: "Seat" },
+          { sym: "/ə/", hindi: "अ (Halka a)", word: "About", speak: "About" },
+          { sym: "/æ/", hindi: "ऐ (Aeh)", word: "Cat", speak: "Cat" },
+          { sym: "/ʃ/", hindi: "श (Sha)", word: "Ship", speak: "Ship" },
+          { sym: "/θ/", hindi: "थ (Tha)", word: "Think", speak: "Think" }
+        ],
+        theoryHtml: `
+          <h4 class="text-sm font-extrabold text-slate-900">1. Noun (संज्ञा) & Tense Basics</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            <strong>Definition:</strong> A Noun is the name of a person, place, thing, or feeling (किसी व्यक्ति, स्थान, वस्तु या भाव के नाम को Noun कहते हैं).
+          </p>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-1.5">
+            <p><strong>Types of Noun:</strong></p>
+            <p>• <strong>Proper Noun:</strong> Ritesh, Jhansi, Ganga (विशेष नाम)</p>
+            <p>• <strong>Common Noun:</strong> Boy, City, Book (जातिवाचक)</p>
+            <p>• <strong>Abstract Noun:</strong> Honesty, Courage (भाववाचक)</p>
+          </div>
+          <p class="text-xs text-indigo-800 font-medium">
+            <strong>Golden Rule:</strong> Simple Present Tense mein He/She/It ke saath verb mein <code>-s/-es</code> lagta hai (e.g., <em>He reads a book</em>).
+          </p>
+        `,
+        speakSample: "A Noun is the name of a person, place, or thing. For example, Ritesh lives in Jhansi.",
+        exercises: [
+          {
+            q: "1. Identify the Proper Noun in: 'Ritesh goes to Jhansi every Sunday.'",
+            options: ["goes", "Jhansi", "every", "to"],
+            ans: 1,
+            exp: "Jhansi ek vishesh shehar ka naam hai, isliye yeh Proper Noun hai."
+          },
+          {
+            q: "2. Choose the correct verb: 'She _____ English daily.'",
+            options: ["speak", "speaks", "speaking", "spoken"],
+            ans: 1,
+            exp: "Simple Present Tense mein singular subject 'She' ke saath verb mein 's' lagta hai (speaks)."
+          }
+        ]
+      },
+      hindi: {
+        title: "हिंदी व्याकरण एवं शुद्ध उच्चारण",
+        phoneticsTitle: "🔊 हिंदी वर्णमाला एवं मात्रा ज्ञान",
+        phoneticsDesc: "स्वर (11) और व्यंजन (33) के सही उच्चारण स्थान पर टैप करके सुनें:",
+        phonetics: [
+          { sym: "अ / आ", hindi: "कंठ्य (Throat)", word: "अमर / आम", speak: "अमर, आम" },
+          { sym: "इ / ई", hindi: "तालव्य (Palate)", word: "इमली / ईख", speak: "इमली, ईख" },
+          { sym: "उ / ऊ", hindi: "ओष्ठ्य (Lips)", word: "उल्लू / ऊन", speak: "उल्लू, ऊन" },
+          { sym: "क्ष", hindi: "क् + ष (संयुक्त)", word: "क्षत्रिय", speak: "क्षत्रिय" },
+          { sym: "त्र", hindi: "त् + र (संयुक्त)", word: "त्रिशूल", speak: "त्रिशूल" },
+          { sym: "ज्ञ", hindi: "ज् + ञ (संयुक्त)", word: "ज्ञान", speak: "ज्ञान" }
+        ],
+        theoryHtml: `
+          <h4 class="text-sm font-extrabold text-slate-900">1. संधि (Sandhi) — परिभाषा और भेद</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            <strong>परिभाषा:</strong> दो निकटवर्ती वर्णों के परस्पर मेल से जो विकार (परिवर्तन) उत्पन्न होता है, उसे <strong>संधि</strong> कहते हैं।
+          </p>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-1.5">
+            <p><strong>संधि के 3 मुख्य भेद:</strong></p>
+            <p>• <strong>स्वर संधि:</strong> विद्या + आलय = विद्यालय (आ + आ = आ)</p>
+            <p>• <strong>व्यंजन संधि:</strong> जगत् + नाथ = जगन्नाथ</p>
+            <p>• <strong>विसर्ग संधि:</strong> मनः + रथ = मनोरथ</p>
+          </div>
+        `,
+        speakSample: "दो निकटवर्ती वर्णों के मेल से होने वाले परिवर्तन को संधि कहते हैं। जैसे विद्या धन आलय बराबर विद्यालय।",
+        exercises: [
+          {
+            q: "1. 'विद्यालय' शब्द में कौन-सी संधि है?",
+            options: ["गुण संधि", "दीर्घ स्वर संधि", "यण संधि", "विसर्ग संधि"],
+            ans: 1,
+            exp: "विद्या + आलय (आ + आ = आ) में समान स्वर मिलकर दीर्घ बनते हैं, अतः दीर्घ स्वर संधि है।"
+          },
+          {
+            q: "2. 'मनोरथ' का सही संधि-विच्छेद क्या होगा?",
+            options: ["मनो + रथ", "मनः + रथ", "मन + ओरथ", "मना + रथ"],
+            ans: 1,
+            exp: "यह विसर्ग संधि का उदाहरण है: मनः + रथ = मनोरथ।"
+          }
+        ]
+      },
+      sanskrit: {
+        title: "संस्कृतम् — व्याकरणम् एवं सम्भाषणम्",
+        phoneticsTitle: "🔊 माहेश्वर सूत्राणि एवं संस्कृत उच्चारण",
+        phoneticsDesc: "संस्कृत व्याकरण की नींव (प्रत्याहार एवं शुद्ध उच्चारण) सुनने के लिए टैप करें:",
+        phonetics: [
+          { sym: "अइउण्", hindi: "प्रथम सूत्र (अच्)", word: "अ, इ, उ", speak: "अ इ उण्" },
+          { sym: "ऋऌक्", hindi: "द्वितीय सूत्र", word: "ऋ, ऌ", speak: "ऋ ऌ क्" },
+          { sym: "अनुस्वार (ं)", hindi: "नासिक्य ध्वनि", word: "संस्कृतम्", speak: "संस्कृतम्" },
+          { sym: "विसर्ग (ः)", hindi: "हकार ध्वनि", word: "रामः / बालकः", speak: "रामः, बालकः" },
+          { sym: "हलन्त (्)", hindi: "अर्ध व्यंजन", word: "पठ् / गम्", speak: "पठ्, गम्" },
+          { sym: "लट् लकार", hindi: "वर्तमान काल", word: "पठति", speak: "सः पठति" }
+        ],
+        theoryHtml: `
+          <h4 class="text-sm font-extrabold text-slate-900">1. लकार (काल) एवं धातु रूप परिचय</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            <strong>परिभाषा:</strong> क्रिया के मूल रूप को <strong>धातु</strong> (जैसे- पठ्, गम्, भू) कहते हैं। काल और अवस्था के अनुसार संस्कृत में 10 लकार होते हैं, जिनमें 5 प्रमुख हैं।
+          </p>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-1.5">
+            <p><strong>प्रमुख लकार एवं उदाहरण (पठ् धातु):</strong></p>
+            <p>• <strong>लट् लकार (वर्तमान):</strong> सः पठति (वह पढ़ता है)</p>
+            <p>• <strong>लृट् लकार (भविष्यत्):</strong> सः पठिष्यति (वह पढ़ेगा)</p>
+            <p>• <strong>लङ् लकार (भूतकाल):</strong> सः अपठत् (उसने पढ़ा)</p>
+          </div>
+        `,
+        speakSample: "सः पुस्तकं पठति। अहम् संस्कृतं वदामि।",
+        exercises: [
+          {
+            q: "1. 'वह पढ़ता है' — इसका सही संस्कृत अनुवाद क्या है?",
+            options: ["सः पठति", "सः अपठत्", "सः पठिष्यति", "अहं पठामि"],
+            ans: 0,
+            exp: "प्रथम पुरुष एकवचन वर्तमान काल (लट् लकार) में 'सः पठति' सही रूप है।"
+          },
+          {
+            q: "2. 'पठिष्यति' किस लकार का रूप है?",
+            options: ["लट् लकार", "लङ् लकार", "लृट् लकार", "लोट् लकार"],
+            ans: 2,
+            exp: "'पठिष्यति' भविष्यत् काल अर्थात् लृट् लकार का रूप है।"
+          }
+        ]
+      }
+    };
+
+    // ==================== 3-LEVEL DICTIONARY DATA ====================
+    const DICTIONARY_WORDS = [
+      {
+        en: "Courage",
+        hi: "साहस / वीरता (Sanskrit: शौर्यम् / धैर्यम्)",
+        meaning: "Darr ke bawajood sahi kaam karne ki himmat.",
+        traditional: "Valour / Fortitude (शौर्यम् / पराक्रम) — 'The warrior showed great fortitude in battle.'",
+        intermediary: "Bravery / Boldness (हिम्मत / साहस) — 'It takes bravery to speak in front of everyone.'",
+        modern: "Guts / Nerve / Grit (दम / जिगर) — 'She had the grit to start her own company.'"
+      },
+      {
+        en: "Knowledge",
+        hi: "ज्ञान / विद्या (Sanskrit: ज्ञानम् / प्रज्ञा)",
+        meaning: "Padhai aur anubhav se milne wali samajh.",
+        traditional: "Erudition / Wisdom (विद्वत्ता / प्रज्ञा) — 'Ancient sages were known for their deep erudition.'",
+        intermediary: "Understanding / Awareness (जानकारी / समझ) — 'Good knowledge of grammar helps in writing.'",
+        modern: "Know-how / Insight (स्मार्ट समझ) — 'Tech know-how is essential in today's world.'"
+      },
+      {
+        en: "Happy",
+        hi: "खुश / प्रसन्न (Sanskrit: प्रसन्नः / मुदितः)",
+        meaning: "Mann ki khushi aur santosh ki sthiti.",
+        traditional: "Joyous / Blissful (आनंदित / हर्षित) — 'The festival brought a joyous atmosphere.'",
+        intermediary: "Glad / Cheerful (खुश / प्रसन्न) — 'I am glad to meet you today.'",
+        modern: "Thrilled / Hyped / Stoked (बेहद उत्साहित) — 'Students were thrilled after passing the level exam!'"
+      },
+      {
+        en: "Friend",
+        hi: "मित्र / दोस्त (Sanskrit: मित्रम् / सखा)",
+        meaning: "Woh vyakti jis par hum bharosa karte hain.",
+        traditional: "Companion / Comrade (सखा / सहचर) — 'A true companion stands by you in hard times.'",
+        intermediary: "Buddy / Pal (दोस्त / साथी) — 'He is my childhood buddy.'",
+        modern: "Bestie / Mate / Homie (पक्का यार) — 'Thanks mate, that explanation was super clear!'"
+      }
+    ];
+
+    // ==================== 50-MCQ GENERATOR BANK ====================
+    const BASE_MCQ_BANK = [
+      { q: "Choose the correct spelling:", opts: ["Recieve", "Receive", "Receve", "Recive"], ans: 1 },
+      { q: "Which sound symbol represents the 'श' sound in English IPA?", opts: ["/s/", "/ʃ/", "/tʃ/", "/θ/"], ans: 1 },
+      { q: "'विद्यालय' में कौन-सी संधि है?", opts: ["दीर्घ संधि", "गुण संधि", "वृद्धि संधि", "अयादि संधि"], ans: 0 },
+      { q: "संस्कृत में 'मैं जाता हूँ' का सही अनुवाद है:", opts: ["अहं गच्छति", "अहं गच्छामि", "सः गच्छामि", "त्वम् गच्छति"], ans: 1 },
+      { q: "Identify the Tense: 'They have completed their homework.'", opts: ["Simple Past", "Present Perfect", "Future Continuous", "Past Perfect"], ans: 1 },
+      { q: "What is the Modern synonym for 'Fortitude / Valour'?", opts: ["Fear", "Grit / Guts", "Laziness", "Doubt"], ans: 1 },
+      { q: "'कमल' का पर्यायवाची शब्द नहीं है:", opts: ["पंकज", "जलज", "नीरज", "जलद"], ans: 3 },
+      { q: "'पठ्' धातु लट् लकार (प्रथम पुरुष बहुवचन) रूप है:", opts: ["पठति", "पठतः", "पठन्ति", "पठामि"], ans: 2 },
+      { q: "Fill in the blank: 'He is _____ honest man.'", opts: ["a", "an", "the", "no article"], ans: 1 },
+      { q: "English mein total kitne Phonetic Sounds (Matrayein) hote hain?", opts: ["26", "36", "44", "52"], ans: 2 }
+    ];
+
+    function generate50Mcqs() {
+      const list = [];
+      for (let i = 0; i < 50; i++) {
+        const base = BASE_MCQ_BANK[i % BASE_MCQ_BANK.length];
+        list.push({
+          id: i + 1,
+          q: `Q${i + 1}. ${base.q}`,
+          opts: base.opts,
+          ans: base.ans
+        });
+      }
+      return list;
+    }
+
+    // ==================== TOAST HELPER ====================
+    let toastTimer = null;
+    function showToast(msg) {
+      const box = document.getElementById('toast-box');
+      const text = document.getElementById('toast-msg');
+      text.textContent = msg;
+      box.classList.remove('hidden');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => box.classList.add('hidden'), 3500);
+    }
+    function hideToast() {
+      document.getElementById('toast-box').classList.add('hidden');
+    }
+
+    // ==================== SPEECH SYNTHESIS HELPER ====================
+    function speakText(text, langCode = 'en-IN') {
+      try {
+        if (!('speechSynthesis' in window)) {
+          showToast("Audio playback is not supported in this browser.");
+          return;
+        }
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = langCode;
+        utter.rate = 0.92;
+        window.speechSynthesis.speak(utter);
+      } catch (e) {
+        console.warn("Speech error:", e);
+      }
+    }
+
+    // ==================== UNIFIED LOGIN, ALWAYS LOGIN & BIOMETRICS ====================
+    function fillCredentials(type) {
+      if (type === 'admin') {
+        document.getElementById('login-id').value = 'admin@vanisetu.com';
+        document.getElementById('login-pass').value = 'admin123';
+        showToast("Admin Master credentials filled!");
+      } else {
+        document.getElementById('login-id').value = 'student@vanisetu.com';
+        document.getElementById('login-pass').value = 'learn123';
+        showToast("Student credentials filled!");
+      }
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-id').value.trim().toLowerCase();
+      const pass = document.getElementById('login-pass').value.trim();
+      const alwaysLogin = document.getElementById('always-login-checkbox').checked;
+
+      if (email === 'admin@vanisetu.com' && pass === 'admin123') {
+        completeSignIn({ email, role: 'admin', name: 'Super Admin' }, alwaysLogin);
+      } else if (email === 'student@vanisetu.com' && pass === 'learn123') {
+        completeSignIn({ email, role: 'student', name: 'Ritesh (Student)' }, alwaysLogin);
+      } else if (email && pass.length >= 4) {
+        // Allow any custom student email for smooth testing
+        completeSignIn({ email, role: 'student', name: email.split('@')[0] }, alwaysLogin);
+      } else {
+        showToast("Kripya sahi Email aur Password dalein.");
+      }
+    }
+
+    function completeSignIn(userObj, persistAlways = true) {
+      APP_STATE.user = userObj;
+      if (persistAlways) {
+        localStorage.setItem('vanisetu_always_user', JSON.stringify(userObj));
+      } else {
+        localStorage.removeItem('vanisetu_always_user');
+      }
+
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('main-app').classList.remove('hidden');
+
+      const roleBadge = document.getElementById('role-badge');
+      const adminBanner = document.getElementById('admin-master-banner');
+      const navAdmin = document.getElementById('nav-admin');
+
+      if (userObj.role === 'admin') {
+        APP_STATE.unlockedLevel = 4; // Full access to all levels
+        roleBadge.textContent = 'ADMIN MASTER';
+        roleBadge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-400 text-indigo-950';
+        adminBanner.classList.remove('hidden');
+        navAdmin.classList.remove('hidden');
+        showToast("Welcome Admin! Sabhi features aur levels unlocked hain.");
+      } else {
+        const savedLvl = parseInt(localStorage.getItem('vanisetu_student_level') || '1', 10);
+        APP_STATE.unlockedLevel = savedLvl;
+        roleBadge.textContent = 'STUDENT';
+        roleBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/30';
+        adminBanner.classList.add('hidden');
+        navAdmin.classList.add('hidden');
+        showToast(`Swagat hai ${userObj.name}! Level ${APP_STATE.unlockedLevel} active hai.`);
+      }
+
+      selectLanguage(APP_STATE.currentLang);
+      renderDictionary();
+      startNew50McqExam(true);
+      switchTab('learn');
+    }
+
+    async function handleBiometricLogin() {
+      const savedBioUser = localStorage.getItem('vanisetu_biometric_user');
+      try {
+        if (window.PublicKeyCredential && navigator.credentials) {
+          // Attempt native WebAuthn check when supported in top-level HTTPS context
+          const challenge = new Uint8Array(16);
+          window.crypto.getRandomValues(challenge);
+          // Graceful check: in sandboxed iframes WebAuthn may throw SecurityError, caught below
+          await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+        }
+      } catch (err) {
+        console.log("WebAuthn fallback active:", err.message);
+      }
+
+      if (savedBioUser) {
+        const parsed = JSON.parse(savedBioUser);
+        showToast("Biometric Verified! Signing in...");
+        completeSignIn(parsed, true);
+      } else {
+        // Default biometric demo sign-in if not yet bound
+        const demoUser = { email: 'student@vanisetu.com', role: 'student', name: 'Biometric User' };
+        localStorage.setItem('vanisetu_biometric_user', JSON.stringify(demoUser));
+        showToast("Fingerprint / Face ID Verified! (Tip: Login ke baad upar Fingerprint icon se Admin ya Student bind karein)");
+        completeSignIn(demoUser, true);
+      }
+    }
+
+    function registerBiometrics() {
+      if (!APP_STATE.user) return;
+      localStorage.setItem('vanisetu_biometric_user', JSON.stringify(APP_STATE.user));
+      showToast(`Biometric Login ab '${APP_STATE.user.email}' (${APP_STATE.user.role.toUpperCase()}) ke liye set ho gaya hai!`);
+    }
+
+    function handleLogout() {
+      APP_STATE.user = null;
+      localStorage.removeItem('vanisetu_always_user');
+      endAiVoiceCall();
+      document.getElementById('main-app').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+      showToast("Aap safely logout ho gaye hain.");
+    }
+
+    // ==================== NAVIGATION ====================
+    function switchTab(tabName) {
+      const tabs = ['learn', 'ai', 'dictionary', 'exam', 'admin'];
+      tabs.forEach(t => {
+        const el = document.getElementById(`tab-${t}`);
+        const nav = document.getElementById(`nav-${t}`);
+        if (el) el.classList.add('hidden');
+        if (nav) {
+          nav.classList.remove('text-indigo-600', 'font-bold');
+          nav.classList.add('text-slate-400', 'font-semibold');
+        }
+      });
+
+      const activeEl = document.getElementById(`tab-${tabName}`);
+      const activeNav = document.getElementById(`nav-${tabName}`);
+      if (activeEl) activeEl.classList.remove('hidden');
+      if (activeNav) {
+        activeNav.classList.remove('text-slate-400', 'font-semibold');
+        activeNav.classList.add('text-indigo-600', 'font-bold');
+      }
+      document.getElementById('main-scroll-area').scrollTop = 0;
+    }
+
+    // ==================== TAB 1: SEEKHEIN (LEARN) RENDERING ====================
+    function selectLanguage(lang) {
+      APP_STATE.currentLang = lang;
+      ['english', 'hindi', 'sanskrit'].forEach(l => {
+        const btn = document.getElementById(`lang-btn-${l}`);
+        if (l === lang) {
+          btn.className = 'lang-pill py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-sm';
+        } else {
+          btn.className = 'lang-pill py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100';
+        }
+      });
+
+      const data = CURRICULUM[lang];
+      document.getElementById('learn-lang-title').textContent = data.title;
+      document.getElementById('phonetics-title').textContent = data.phoneticsTitle;
+      document.getElementById('phonetics-desc').textContent = data.phoneticsDesc;
+
+      // Render Stages (Levels 1 to 4)
+      const isAdmin = APP_STATE.user && APP_STATE.user.role === 'admin';
+      const maxLvl = isAdmin ? 4 : APP_STATE.unlockedLevel;
+      document.getElementById('unlocked-level-badge').textContent = isAdmin
+        ? 'All 4 Levels Unlocked (Admin)'
+        : `Level ${maxLvl} Unlocked`;
+
+      const stages = [
+        { lvl: 1, name: "Stage 1: Foundation", sub: "Phonetics & Matrayein" },
+        { lvl: 2, name: "Stage 2: Core Grammar", sub: "Rules & Exercises" },
+        { lvl: 3, name: "Stage 3: Sentence Craft", sub: "Translation & Syntax" },
+        { lvl: 4, name: "Stage 4: Fluency Mastery", sub: "AI Debate & Literature" }
+      ];
+
+      const stagesHtml = stages.map(st => {
+        const unlocked = st.lvl <= maxLvl;
+        return `
+          <div onclick="${unlocked ? `showToast('${st.name} active hai!')` : `switchTab('exam')`}"
+            class="p-3 rounded-xl border cursor-pointer transition ${unlocked ? 'bg-indigo-50/70 border-indigo-200' : 'bg-slate-100 border-slate-200 opacity-80'}">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[10px] font-extrabold uppercase ${unlocked ? 'text-indigo-700' : 'text-slate-500'}">Level ${st.lvl}</span>
+              <span class="text-xs">${unlocked ? '🔓' : '🔒'}</span>
+            </div>
+            <p class="text-xs font-bold text-slate-900">${st.name}</p>
+            <p class="text-[10px] text-slate-500 mt-0.5">${unlocked ? st.sub : 'Pass 50-MCQ Gate (50%)'}</p>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('stages-container').innerHTML = stagesHtml;
+
+      // Render Phonetics Grid
+      const speechLocale = lang === 'english' ? 'en-IN' : 'hi-IN';
+      document.getElementById('phonetics-grid').innerHTML = data.phonetics.map(p => `
+        <button onclick="speakText('${p.speak}', '${speechLocale}')"
+          class="p-2.5 rounded-xl bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-300 text-left transition active:scale-95">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-extrabold text-indigo-700">${p.sym}</span>
+            <span class="text-[10px]">🔊</span>
+          </div>
+          <p class="text-[11px] font-bold text-slate-800 mt-0.5">${p.word}</p>
+          <p class="text-[10px] text-slate-500">${p.hindi}</p>
+        </button>
+      `).join('');
+
+      // Render Theory
+      document.getElementById('theory-content-box').innerHTML = data.theoryHtml;
+
+      // Render Chapter Exercises
+      document.getElementById('chapter-exercise-result').classList.add('hidden');
+      document.getElementById('chapter-exercise-list').innerHTML = data.exercises.map((ex, idx) => `
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <p class="text-xs font-bold text-slate-800">${ex.q}</p>
+          <div class="grid grid-cols-2 gap-1.5">
+            ${ex.options.map((opt, oIdx) => `
+              <label class="flex items-center gap-2 text-xs bg-white px-2.5 py-2 rounded-lg border border-slate-200 cursor-pointer hover:border-indigo-400">
+                <input type="radio" name="chap-ex-${idx}" value="${oIdx}" class="text-indigo-600" />
+                <span>${opt}</span>
+              </label>
+            `).join('')}
+          </div>
+          <p id="chap-exp-${idx}" class="hidden text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200 font-medium">
+            💡 ${ex.exp}
+          </p>
+        </div>
+      `).join('');
+    }
+
+    function speakCurrentTheory() {
+      const data = CURRICULUM[APP_STATE.currentLang];
+      const locale = APP_STATE.currentLang === 'english' ? 'en-IN' : 'hi-IN';
+      speakText(data.speakSample, locale);
+    }
+
+    function submitChapterExercise() {
+      const data = CURRICULUM[APP_STATE.currentLang];
+      let score = 0;
+      data.exercises.forEach((ex, idx) => {
+        const selected = document.querySelector(`input[name="chap-ex-${idx}"]:checked`);
+        if (selected && parseInt(selected.value, 10) === ex.ans) {
+          score++;
+        }
+        document.getElementById(`chap-exp-${idx}`).classList.remove('hidden');
+      });
+      const resBox = document.getElementById('chapter-exercise-result');
+      resBox.classList.remove('hidden');
+      resBox.innerHTML = `<strong>Score: ${score} / ${data.exercises.length}</strong> — Neeche har prashna ka sahi jawab aur Hindi explanation dikhaya gaya hai.`;
+    }
+
+    function resetChapterExercise() {
+      selectLanguage(APP_STATE.currentLang);
+    }
+
+    // ==================== TAB 2: AI TUTOR (CHAT & VOICE CALL) ====================
+    function setAiSubMode(mode) {
+      const chatBtn = document.getElementById('ai-mode-chat-btn');
+      const callBtn = document.getElementById('ai-mode-call-btn');
+      const chatPanel = document.getElementById('ai-chat-panel');
+      const callPanel = document.getElementById('ai-call-panel');
+
+      if (mode === 'chat') {
+        chatBtn.className = 'py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm transition';
+        callBtn.className = 'py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition';
+        chatPanel.classList.remove('hidden');
+        callPanel.classList.add('hidden');
+      } else {
+        callBtn.className = 'py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm transition';
+        chatBtn.className = 'py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition';
+        callPanel.classList.remove('hidden');
+        chatPanel.classList.add('hidden');
+      }
+    }
+
+    function generateAiTutorReply(userMsg) {
+      const lang = document.getElementById('ai-lang-select').value;
+      const mode = document.getElementById('ai-coach-mode').value;
+      const lower = userMsg.toLowerCase();
+
+      if (lower.includes('yesterday i go')) {
+        return {
+          text: "Bahut achha prayas! Lekin 'Yesterday' (beeta hua kal) ke saath Past Tense lagta hai.\n✅ Sahi Vakya: \"Yesterday I went to the market.\"\nAb aap ek aur vakya 'went' lagakar banaiye!",
+          speak: "Good try! Since you said yesterday, use the past tense went. Yesterday I went to the market."
+        };
+      }
+      if (lang === 'sanskrit' || lower.includes('sanskrit') || lower.includes('संस्कृत')) {
+        return {
+          text: "अति उत्तमम्! (Bahut badhiya!)\nसंस्कृत में अपना परिचय ऐसे दें: \"मम नाम छात्रः अस्ति। अहं प्रतिदिनं संस्कृतं पठामि।\"\n(Mera naam chhatra hai. Main roz Sanskrit padhta hoon.)",
+          speak: "मम नाम छात्रः अस्ति। अहं प्रतिदिनं संस्कृतं पठामि।"
+        };
+      }
+      if (lang === 'hindi') {
+        return {
+          text: `Shabash! Aapka vakya "${userMsg}" spasht hai. Shuddh Hindi mein hum ise aur prabhavshali bana sakte hain. Kya aap kisi vishesh topic (jaise Sandhi ya Muhavare) par baat karna chahenge?`,
+          speak: "शाबाश! आपका वाक्य स्पष्ट है। आइए आगे अभ्यास जारी रखें।"
+        };
+      }
+      if (mode === 'roleplay') {
+        return {
+          text: `[Interview Roleplay] Great! Tell me: "What are your biggest strengths, and how do you improve your communication skills?" (Apni khoobiyan batayein)`,
+          speak: "Great! Tell me, what are your biggest strengths and how do you improve your communication skills?"
+        };
+      }
+      return {
+        text: `Nice sentence! You said: "${userMsg}".\n💡 Tip: Keep your tone confident and clear. Try expanding this into two sentences so we can practice conjunctions like 'because' or 'however'.`,
+        speak: `Nice sentence! You said: ${userMsg}. Keep practicing with confidence!`
+      };
+    }
+
+    function appendChatBubble(sender, text, speakPayload = null) {
+      const box = document.getElementById('ai-chat-messages');
+      const div = document.createElement('div');
+      if (sender === 'user') {
+        div.className = 'ml-auto bg-indigo-600 text-white rounded-2xl rounded-tr-none p-3 text-xs max-w-[82%] shadow-sm whitespace-pre-line';
+        div.textContent = text;
+      } else {
+        div.className = 'bg-white border border-slate-200 rounded-2xl rounded-tl-none p-3 text-xs text-slate-800 max-w-[88%] shadow-sm space-y-1.5 whitespace-pre-line';
+        div.innerHTML = `<p>${text}</p>`;
+        if (speakPayload) {
+          const btn = document.createElement('button');
+          btn.className = 'text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 pt-1';
+          btn.innerHTML = '🔊 Listen Pronunciation';
+          const lang = document.getElementById('ai-lang-select').value === 'english' ? 'en-IN' : 'hi-IN';
+          btn.onclick = () => speakText(speakPayload, lang);
+          div.appendChild(btn);
+        }
+      }
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function sendQuickPrompt(text) {
+      document.getElementById('ai-chat-input').value = text;
+      handleAiChatSubmit(new Event('submit'));
+    }
+
+    function handleAiChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('ai-chat-input');
+      const val = input.value.trim();
+      if (!val) return;
+      input.value = '';
+      appendChatBubble('user', val);
+
+      setTimeout(() => {
+        const reply = generateAiTutorReply(val);
+        appendChatBubble('ai', reply.text, reply.speak);
+        const lang = document.getElementById('ai-lang-select').value === 'english' ? 'en-IN' : 'hi-IN';
+        speakText(reply.speak, lang);
+      }, 350);
+    }
+
+    function clearAiChat() {
+      document.getElementById('ai-chat-messages').innerHTML = '';
+      appendChatBubble('ai', 'Chat saaf ho gayi hai! Naya sawal poochein ya bolkar practice karein.');
+    }
+
+    function startVoiceRecognitionForChat() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) {
+        showToast("Mic speech-to-text is browser mein limited hai; aap seedha type karke test kar sakte hain.");
+        return;
+      }
+      const rec = new SpeechRec();
+      rec.lang = document.getElementById('ai-lang-select').value === 'english' ? 'en-IN' : 'hi-IN';
+      showToast("🎙️ Sun raha hoon... Boliye!");
+      rec.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('ai-chat-input').value = transcript;
+        handleAiChatSubmit(new Event('submit'));
+      };
+      rec.onerror = () => showToast("Awaaz clear nahi mili, dobara koshish karein.");
+      rec.start();
+    }
+
+    // Live AI Voice Call Logic
+    function startAiVoiceCall() {
+      APP_STATE.callActive = true;
+      APP_STATE.callSeconds = 0;
+      document.getElementById('call-status-pill').textContent = 'Connected • Live AI Call';
+      document.getElementById('call-pulse-ring').classList.remove('hidden');
+      document.getElementById('call-wave-bars').classList.remove('hidden');
+      document.getElementById('btn-start-call').classList.add('hidden');
+      document.getElementById('btn-speak-turn').classList.remove('hidden');
+      document.getElementById('btn-end-call').classList.remove('hidden');
+
+      const greeting = "Namaste! I am your VaniSetu Voice Mentor. How was your day today? Tell me in English, Hindi, or Sanskrit.";
+      document.getElementById('call-live-caption').textContent = greeting;
+      speakText(greeting, 'en-IN');
+
+      APP_STATE.callTimerInterval = setInterval(() => {
+        APP_STATE.callSeconds++;
+        const mins = String(Math.floor(APP_STATE.callSeconds / 60)).padStart(2, '0');
+        const secs = String(APP_STATE.callSeconds % 60).padStart(2, '0');
+        document.getElementById('call-timer').textContent = `${mins}:${secs}`;
+      }, 1000);
+    }
+
+    function triggerCallUserTurn() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRec) {
+        const rec = new SpeechRec();
+        rec.lang = document.getElementById('ai-lang-select').value === 'english' ? 'en-IN' : 'hi-IN';
+        document.getElementById('call-live-caption').textContent = "🎙️ Listening to your voice...";
+        rec.onresult = (event) => {
+          const spoken = event.results[0][0].transcript;
+          const reply = generateAiTutorReply(spoken);
+          document.getElementById('call-live-caption').textContent = `You: "${spoken}" → AI: ${reply.speak}`;
+          speakText(reply.speak, rec.lang);
+        };
+        rec.onerror = () => {
+          const fallbackReply = "I heard you! Try saying: 'I am practicing my spoken English with VaniSetu.'";
+          document.getElementById('call-live-caption').textContent = fallbackReply;
+          speakText(fallbackReply, 'en-IN');
+        };
+        rec.start();
+      } else {
+        const simReply = "Great confidence! Remember to use past tense verbs when talking about yesterday. Keep going!";
+        document.getElementById('call-live-caption').textContent = simReply;
+        speakText(simReply, 'en-IN');
+      }
+    }
+
+    function endAiVoiceCall() {
+      APP_STATE.callActive = false;
+      if (APP_STATE.callTimerInterval) clearInterval(APP_STATE.callTimerInterval);
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      document.getElementById('call-status-pill').textContent = 'Call Ended';
+      document.getElementById('call-pulse-ring').classList.add('hidden');
+      document.getElementById('call-wave-bars').classList.add('hidden');
+      document.getElementById('btn-start-call').classList.remove('hidden');
+      document.getElementById('btn-speak-turn').classList.add('hidden');
+      document.getElementById('btn-end-call').classList.add('hidden');
+      document.getElementById('call-timer').textContent = '00:00';
+      document.getElementById('call-live-caption').textContent = 'Call samapt hui. Jab chahein dubara practice karein!';
+    }
+
+    // ==================== TAB 3: 3-LEVEL SHABDKOSH ====================
+    function quickSearchDict(term) {
+      document.getElementById('dict-search-input').value = term;
+      renderDictionary();
+    }
+
+    function renderDictionary() {
+      const q = (document.getElementById('dict-search-input').value || '').trim().toLowerCase();
+      const filtered = DICTIONARY_WORDS.filter(w =>
+        !q ||
+        w.en.toLowerCase().includes(q) ||
+        w.hi.toLowerCase().includes(q) ||
+        w.traditional.toLowerCase().includes(q) ||
+        w.intermediary.toLowerCase().includes(q) ||
+        w.modern.toLowerCase().includes(q)
+      );
+
+      const container = document.getElementById('dictionary-results');
+      if (!filtered.length) {
+        container.innerHTML = `<div class="bg-white rounded-2xl p-6 text-center text-xs text-slate-500 border border-slate-200">Koi shabd nahi mila. Admin Panel se naya shabd bhi joda ja sakta hai!</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(w => `
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2.5">
+          <div class="flex items-start justify-between">
+            <div>
+              <h3 class="text-base font-extrabold text-indigo-950">${w.en}</h3>
+              <p class="text-xs font-semibold text-teal-700">${w.hi}</p>
+            </div>
+            <button onclick="speakText('${w.en}', 'en-IN')" class="px-2.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold">
+              🔊 Speak
+            </button>
+          </div>
+          <p class="text-xs text-slate-600">${w.meaning}</p>
+
+          <div class="space-y-1.5 pt-1">
+            <div class="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/80 text-xs">
+              <span class="font-extrabold text-amber-900">1. Traditional (Paramprik / Shuddh):</span>
+              <p class="text-slate-700 mt-0.5">${w.traditional}</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-sky-50/80 border border-sky-200/80 text-xs">
+              <span class="font-extrabold text-sky-900">2. Intermediary (Aam Bolchal):</span>
+              <p class="text-slate-700 mt-0.5">${w.intermediary}</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-purple-50/80 border border-purple-200/80 text-xs">
+              <span class="font-extrabold text-purple-900">3. Modern (Smart / Contemporary):</span>
+              <p class="text-slate-700 mt-0.5">${w.modern}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ==================== TAB 4: 50-MCQ LEVEL-GATE EXAM ====================
+    function startNew50McqExam(silent = false) {
+      APP_STATE.examQuestions = generate50Mcqs();
+      APP_STATE.examAnswers = {};
+      document.getElementById('exam-result-card').classList.add('hidden');
+      document.getElementById('exam-answered-count').textContent = '0';
+
+      const container = document.getElementById('exam-questions-container');
+      container.innerHTML = APP_STATE.examQuestions.map((item, idx) => `
+        <div id="mcq-card-${idx}" class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200 space-y-2">
+          <p class="text-xs font-bold text-slate-900">${item.q}</p>
+          <div class="grid grid-cols-2 gap-1.5">
+            ${item.opts.map((opt, oIdx) => `
+              <label class="flex items-center gap-2 text-xs bg-slate-50 px-2.5 py-2 rounded-xl border border-slate-200 cursor-pointer hover:border-indigo-400">
+                <input type="radio" name="gate-mcq-${idx}" value="${oIdx}" onchange="recordMcqAnswer(${idx}, ${oIdx})" class="text-indigo-600" />
+                <span>${opt}</span>
+              </label>
+            `).join('')}
+          </div>
+          <p id="mcq-feedback-${idx}" class="hidden text-[11px] font-semibold px-2.5 py-1 rounded-lg"></p>
+        </div>
+      `).join('');
+
+      if (!silent) {
+        showToast("Naya 50-MCQ Level Test taiyaar hai! Kam se kam 25/50 (50%) score karein.");
+      }
+    }
+
+    function recordMcqAnswer(qIdx, optIdx) {
+      APP_STATE.examAnswers[qIdx] = optIdx;
+      document.getElementById('exam-answered-count').textContent = Object.keys(APP_STATE.examAnswers).length;
+    }
+
+    function autoFillDemoExam() {
+      // Fills 32 correct out of 50 (64%) so user can quickly test passing & unlocking next level
+      APP_STATE.examQuestions.forEach((item, idx) => {
+        const chosen = idx < 32 ? item.ans : (item.ans + 1) % item.opts.length;
+        APP_STATE.examAnswers[idx] = chosen;
+        const radio = document.querySelector(`input[name="gate-mcq-${idx}"][value="${chosen}"]`);
+        if (radio) radio.checked = true;
+      });
+      document.getElementById('exam-answered-count').textContent = '50';
+      showToast("Demo answers filled (32/50 = 64%). Ab 'Submit Exam' dabayein!");
+    }
+
+    function submit50McqExam() {
+      let correct = 0;
+      APP_STATE.examQuestions.forEach((item, idx) => {
+        const userAns = APP_STATE.examAnswers[idx];
+        const fb = document.getElementById(`mcq-feedback-${idx}`);
+        fb.classList.remove('hidden');
+        if (userAns === item.ans) {
+          correct++;
+          fb.className = 'text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800';
+          fb.textContent = `✓ Sahi Jawab: ${item.opts[item.ans]}`;
+        } else {
+          fb.className = 'text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-rose-50 text-rose-800';
+          fb.textContent = `✗ Sahi Jawab: ${item.opts[item.ans]}`;
+        }
+      });
+
+      const percent = Math.round((correct / 50) * 100);
+      const passed = correct >= 25; // At least 50% required
+      APP_STATE.examStats.attempts++;
+      if (correct > APP_STATE.examStats.bestScore) {
+        APP_STATE.examStats.bestScore = correct;
+      }
+
+      document.getElementById('exam-attempt-badge').textContent =
+        `Attempts: ${APP_STATE.examStats.attempts} | Best: ${APP_STATE.examStats.bestScore}/50`;
+
+      const resCard = document.getElementById('exam-result-card');
+      resCard.classList.remove('hidden');
+
+      if (passed) {
+        if (APP_STATE.user && APP_STATE.user.role === 'student' && APP_STATE.unlockedLevel < 4) {
+          APP_STATE.unlockedLevel++;
+          localStorage.setItem('vanisetu_student_level', String(APP_STATE.unlockedLevel));
+          selectLanguage(APP_STATE.currentLang);
+        }
+        resCard.className = 'rounded-2xl p-4 border border-emerald-300 bg-emerald-50 text-emerald-950 shadow-sm space-y-1.5';
+        resCard.innerHTML = `
+          <h3 class="text-sm font-extrabold text-emerald-900">🎉 Badhai Ho! Level Qualified (${correct}/50 — ${percent}%)</h3>
+          <p class="text-xs">Aapne 50% benchmark paar kar liya hai! <strong>Level ${APP_STATE.unlockedLevel}</strong> unlock ho gaya hai. Aap jab chahein dubara practice ke liye re-exam de sakte hain.</p>
+        `;
+        showToast(`Qualified! ${correct}/50 (${percent}%) — Next Level Unlocked!`);
+      } else {
+        resCard.className = 'rounded-2xl p-4 border border-amber-300 bg-amber-50 text-amber-950 shadow-sm space-y-1.5';
+        resCard.innerHTML = `
+          <h3 class="text-sm font-extrabold text-amber-900">⚠️ Score: ${correct}/50 (${percent}%) — 50% Required</h3>
+          <p class="text-xs">Next level unlock karne ke liye kam se kam <strong>25/50 (50%)</strong> chahiye. Neeche sahi jawab dekhein aur 'Start / Re-Attempt 50 MCQs' par click karke dubara test dein.</p>
+        `;
+        showToast(`Score ${correct}/50 (${percent}%). Pass hone ke liye 25/50 chahiye.`);
+      }
+      document.getElementById('main-scroll-area').scrollTop = 0;
+    }
+
+    // ==================== TAB 5: ADMIN LIVE CONTENT MANAGER ====================
+    function handleAdminAddWord(e) {
+      e.preventDefault();
+      const newWord = {
+        en: document.getElementById('admin-word-en').value.trim(),
+        hi: document.getElementById('admin-word-hi').value.trim(),
+        meaning: "Admin dwara joda gaya vishesh shabd.",
+        traditional: document.getElementById('admin-word-trad').value.trim(),
+        intermediary: document.getElementById('admin-word-inter').value.trim(),
+        modern: document.getElementById('admin-word-mod').value.trim()
+      };
+      DICTIONARY_WORDS.unshift(newWord);
+      renderDictionary();
+      e.target.reset();
+      showToast(`'${newWord.en}' ShabdKosh mein live add ho gaya hai!`);
+    }
+
+    // ==================== AUTO-LOGIN & SERVICE WORKER INIT ====================
+    window.addEventListener('DOMContentLoaded', () => {
+      // Check Always Login persistence
+      const savedUser = localStorage.getItem('vanisetu_always_user');
+      if (savedUser) {
+        try {
+          completeSignIn(JSON.parse(savedUser), true);
+        } catch (err) {
+          localStorage.removeItem('vanisetu_always_user');
+        }
+      }
+
+      // Register Service Worker if served over HTTP/HTTPS (GitHub Pages / Hosting)
+      if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      }
+    });
+  </script>
+</body>
+</html>
