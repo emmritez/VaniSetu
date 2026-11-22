@@ -7,6 +7,8 @@
   <meta name="theme-color" content="#1e1b4b" />
   <meta name="description" content="VaniSetu - Trilingual AI Learning PWA (English, Hindi, Sanskrit) with 195 Chapters, 975 Graded MCQs, Indian TTS, and Final Language Expert Certification." />
   <link rel="manifest" id="pwa-manifest-link" />
+  <link rel="apple-touch-icon" id="apple-touch-icon-link" />
+  <link rel="icon" type="image/png" id="favicon-icon-link" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -61,6 +63,22 @@
       50% { height: 32px; }
     }
     .wave-bar { animation: waveBar 1s ease-in-out infinite; }
+
+    @keyframes trialFlash {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.75);
+      }
+      50% {
+        opacity: 0.72;
+        transform: scale(1.04);
+        box-shadow: 0 0 12px 2px rgba(245, 158, 11, 0.65);
+      }
+    }
+    .animate-trial-flash {
+      animation: trialFlash 1.5s ease-in-out infinite;
+    }
   </style>
 </head>
 <body class="min-h-screen flex justify-center items-start sm:py-3">
@@ -104,6 +122,36 @@
               </div>
             </div>
             <textarea id="sw-code-box" readonly rows="7" class="w-full font-mono text-[11px] bg-slate-900 text-amber-300 p-3 rounded-xl focus:outline-none"></textarea>
+          </div>
+          <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-950">
+            <strong>App Icon Note:</strong> Upar Admin panel se apna custom logo upload karte hi installed PWA icon (192x192 &amp; 512x512) automatically update ho jata hai.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Google Apps Script (code.gs) Modal for Google Spreadsheet Sync -->
+    <div id="gsheet-modal" class="hidden fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl w-full max-w-[450px] max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-5 py-4 bg-emerald-950 text-white flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-extrabold">📊 Google Sheets Apps Script (code.gs)</h3>
+            <p class="text-[11px] text-emerald-200">Auto-creates 'Users_Report' tab in your Spreadsheet</p>
+          </div>
+          <button type="button" onclick="toggleGsheetModal(false)" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-sm font-bold">✕</button>
+        </div>
+        <div class="p-4 overflow-y-auto space-y-3 text-xs">
+          <ol class="list-decimal list-inside space-y-1 text-[11px] text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <li>Apni Google Sheet kholein → <strong>Extensions → Apps Script</strong> par click karein.</li>
+            <li>Neeche diya gaya <strong>code.gs</strong> paste karke <strong>Deploy → New deployment → Web app</strong> (Execute as: <em>Me</em>, Who has access: <em>Anyone</em>) select karein.</li>
+            <li>Mila hua <strong>Web App URL</strong> Admin panel ke Google Sheets Sync box mein paste karke Save karein.</li>
+          </ol>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-extrabold text-slate-800">code.gs (Google Apps Script)</span>
+              <button type="button" onclick="copyCodeBlock('gsheet-code-box')" class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">Copy Script</button>
+            </div>
+            <textarea id="gsheet-code-box" readonly rows="11" class="w-full font-mono text-[10px] bg-slate-900 text-emerald-300 p-3 rounded-xl focus:outline-none"></textarea>
           </div>
         </div>
       </div>
@@ -160,10 +208,10 @@
     <!-- ==================== 1. UNIFIED LOGIN & SAVED CREDENTIALS SCREEN ==================== -->
     <section id="login-screen" class="flex-1 flex flex-col justify-between p-5 bg-gradient-to-b from-indigo-950 via-indigo-900 to-slate-900 text-white overflow-y-auto">
       <div class="pt-2">
-        <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center justify-between gap-2 mb-3">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center shadow-lg text-indigo-950 font-black text-xl">
-              वाS
+            <div class="w-12 h-12 rounded-2xl bg-white/10 border border-amber-300/40 p-0.5 flex items-center justify-center shadow-lg overflow-hidden shrink-0">
+              <img id="login-brand-logo" alt="VaniSetu Logo" class="w-full h-full object-cover rounded-[14px]" />
             </div>
             <div>
               <span class="inline-block text-[10px] font-bold uppercase tracking-wider bg-indigo-800/90 text-amber-300 px-2.5 py-0.5 rounded-full border border-indigo-700">
@@ -172,48 +220,55 @@
               <h1 class="text-2xl font-black tracking-tight text-white mt-0.5">VaniSetu</h1>
             </div>
           </div>
+
+          <!-- Flashing Under Trial Badge on Login Header Right -->
+          <span class="animate-trial-flash inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-400 text-indigo-950 text-[10px] font-black uppercase tracking-wider border border-amber-200 shrink-0">
+            <span class="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
+            Under Trial
+          </span>
         </div>
         <p class="text-sm font-bold text-amber-300 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 text-center tracking-wide">
           "Learn Smart. Speak Confidently."
         </p>
       </div>
 
-      <!-- Saved Accounts 1-Tap Switcher -->
+      <!-- Saved Accounts 1-Tap Switcher (User's own saved accounts only) -->
       <div id="saved-accounts-box" class="hidden my-3 bg-white/10 border border-white/15 rounded-2xl p-3">
-        <p class="text-[11px] font-bold text-amber-200 mb-2">⚡ Saved Quick-Login Credentials (1-Tap):</p>
+        <p class="text-[11px] font-bold text-amber-200 mb-2">⚡ Saved Accounts on This Device (1-Tap Login):</p>
         <div id="saved-accounts-list" class="flex flex-wrap gap-2"></div>
       </div>
 
-      <!-- Unified Login Form Card -->
+      <!-- Unified Single Login & Sign-Up Form Card -->
       <div class="bg-white text-slate-800 rounded-3xl p-5 shadow-2xl my-2">
         <div class="flex items-center justify-between mb-2">
-          <h2 class="text-base font-extrabold text-slate-900">Swagat Hai (Unified Login)</h2>
+          <h2 id="auth-card-heading" class="text-base font-extrabold text-slate-900">Sign In to VaniSetu</h2>
           <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-            Auto-Save Ready
+            Unified Portal
           </span>
         </div>
         <p class="text-xs text-slate-500 mb-3">
-          195 Chapters (65 English + 65 Hindi + 65 Sanskrit) &amp; 975 Graded MCQs ek hi platform par.
+          195 Chapters (English • हिंदी • संस्कृतम्) &amp; 975 Graded MCQs ek hi platform par.
         </p>
 
-        <div class="grid grid-cols-2 gap-2 mb-3.5">
-          <button type="button" onclick="fillCredentials('student')" class="text-xs font-bold bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 py-2 px-2.5 rounded-xl transition">
-            🎓 Student Quick-Fill
+        <!-- Mode Toggle: Sign In vs Create New User Account -->
+        <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl mb-3.5">
+          <button type="button" id="auth-mode-signin-btn" onclick="setAuthMode('signin')" class="py-1.5 rounded-lg text-xs font-extrabold bg-white text-indigo-700 shadow-sm">
+            🔐 Login
           </button>
-          <button type="button" onclick="fillCredentials('admin')" class="text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 py-2 px-2.5 rounded-xl transition">
-            👑 Admin Quick-Fill
+          <button type="button" id="auth-mode-signup-btn" onclick="setAuthMode('signup')" class="py-1.5 rounded-lg text-xs font-bold text-slate-600">
+            ✨ Create Account
           </button>
         </div>
 
         <form id="login-form" onsubmit="handleLogin(event)" class="space-y-3">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Full Name (For Certificate &amp; Profile)</label>
-            <input id="login-name" type="text" placeholder="e.g. Ritesh Kumar"
+          <div id="signup-name-wrapper" class="hidden">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Full Name</label>
+            <input id="login-name" type="text" placeholder="e.g. User Name"
               class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white" />
           </div>
           <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Email / Login ID</label>
-            <input id="login-id" type="email" required placeholder="student@vanisetu.com"
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Email Address</label>
+            <input id="login-id" type="email" required placeholder="abc@vanisetu.com"
               class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white" />
           </div>
           <div>
@@ -224,11 +279,11 @@
           <div class="flex items-center justify-between pt-0.5">
             <label class="flex items-center gap-2 cursor-pointer select-none">
               <input id="always-login-checkbox" type="checkbox" checked class="w-4 h-4 rounded text-indigo-600 border-slate-300" />
-              <span class="text-xs font-bold text-slate-700">Always Login (Save Credentials)</span>
+              <span class="text-xs font-bold text-slate-700">Always Login (Save on Device)</span>
             </label>
           </div>
-          <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-extrabold text-xs shadow-md transition">
-            Save &amp; Enter VaniSetu →
+          <button type="submit" id="auth-submit-btn" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-extrabold text-xs shadow-md transition">
+            Login &amp; Enter VaniSetu →
           </button>
         </form>
 
@@ -236,13 +291,13 @@
           <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
           </svg>
-          <span>Login with Biometrics (WebAuthn / Fingerprint)</span>
+          <span>Login with Biometrics (Fingerprint / Face ID)</span>
         </button>
       </div>
 
-      <p class="text-center text-[10px] text-indigo-300/90">
-        Student: <span class="text-white font-mono">student@vanisetu.com</span> / <span class="text-white font-mono">learn123</span> • Admin: <span class="text-white font-mono">admin@vanisetu.com</span> / <span class="text-white font-mono">admin123</span>
-      </p>
+      <footer class="text-center text-[11px] font-semibold text-indigo-200/90 pt-1">
+        © 2026 VaniSetu • Created by Ritesh Srivastava
+      </footer>
     </section>
 
     <!-- ==================== 2. MAIN AUTHENTICATED WORKSPACE ==================== -->
@@ -250,10 +305,10 @@
 
       <!-- Top Header -->
       <header class="bg-indigo-950 text-white px-4 pt-3 pb-2.5 shrink-0 shadow-md z-10">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-2.5" onclick="switchTab('home')" style="cursor:pointer;">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center text-indigo-950 font-black text-sm shadow">
-              वाS
+            <div class="w-9 h-9 rounded-xl bg-white/10 border border-amber-300/40 p-0.5 flex items-center justify-center shadow overflow-hidden shrink-0">
+              <img id="header-brand-logo" alt="VaniSetu" class="w-full h-full object-cover rounded-[10px]" />
             </div>
             <div>
               <div class="flex items-center gap-1.5">
@@ -267,8 +322,10 @@
           </div>
 
           <div class="flex items-center gap-1.5">
-            <span id="tts-voice-pill" title="Indian English, Hindi & Clear Sanskrit TTS Active" class="hidden sm:inline-flex items-center gap-1 bg-indigo-900/90 border border-indigo-700 px-2 py-1 rounded-lg text-[10px] font-bold text-amber-300">
-              🇮🇳 en-IN • hi-IN • sa-IN
+            <!-- Flashing Under Trial Badge on Header Right -->
+            <span class="animate-trial-flash inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-400 text-indigo-950 text-[9px] font-black uppercase tracking-wider border border-amber-200 shrink-0">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-600 animate-ping"></span>
+              Under Trial
             </span>
             <button type="button" onclick="registerBiometrics()" title="Save Biometric Login" class="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-amber-300 text-xs">
               👆
@@ -727,62 +784,7 @@
             <button type="button" onclick="setExamLanguage('hindi')" id="exam-lang-hindi-btn" class="py-2 px-1.5 rounded-xl text-[11px] font-extrabold text-amber-950 bg-amber-50 hover:bg-amber-100">
               🇮🇳 हिंदी (65)
             </button>
-            <button type="button" onclick="setExamLanguage('sanskrit')" id="exam-lang-sanskrit-btn" class="py-2 px-1.5 rounded-xl text-[11px] font-extrabold text-indigo-950 bg-indigo-50 hover:bg-indigo-100">
-              🕉️ संस्कृतम् (65)
-            </button>
-          </div>
-
-          <!-- Mode Switcher: 50-MCQ Level Gate vs 100-MCQ Final Expert Exam (2h 30m) -->
-          <div class="bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200 grid grid-cols-2 gap-1.5">
-            <button type="button" onclick="openExamMode('gate50')" id="exam-mode-gate50-btn" class="py-2 px-2 rounded-xl text-xs font-extrabold bg-indigo-600 text-white shadow-sm">
-              🎯 Level Gate (50 MCQs)
-            </button>
-            <button type="button" onclick="openExamMode('final100')" id="exam-mode-final100-btn" class="py-2 px-2 rounded-xl text-xs font-extrabold text-amber-900 bg-amber-50 hover:bg-amber-100">
-              🏆 Final Expert (100 MCQs • 2.5h)
-            </button>
-          </div>
-
-          <!-- Exam Header Banner -->
-          <div id="exam-banner-card" class="bg-gradient-to-r from-indigo-900 to-indigo-800 text-white rounded-2xl p-4 shadow-md space-y-2">
-            <div class="flex items-center justify-between gap-2">
-              <span id="exam-tag-pill" class="text-[10px] font-extrabold uppercase bg-amber-400 text-indigo-950 px-2.5 py-0.5 rounded-full">
-                50-MCQ Gate (325-Bank)
-              </span>
-              <span id="exam-attempt-badge" class="text-[11px] font-semibold text-indigo-200">Attempts: 0 | Best: 0/50</span>
-            </div>
-            <h2 id="exam-main-heading" class="text-base font-extrabold">Level Qualification Test (50 MCQs)</h2>
-            <p id="exam-main-desc" class="text-[11px] text-indigo-200">
-              Minimum <strong>50% (25/50)</strong> score par next module unlock hoga. Pass hone ke baad bhi <strong>unlimited re-exams</strong> de sakte hain.
-            </p>
-
-            <!-- Live 2:30:00 Countdown Timer Box (Final 100-MCQ Expert Mode) -->
-            <div id="final-exam-timer-bar" class="hidden p-2.5 rounded-xl bg-black/30 border border-amber-400/40 flex items-center justify-between">
-              <div>
-                <span class="block text-[9px] uppercase font-bold text-amber-300">Time Remaining (2 Hours 30 Min)</span>
-                <span id="final-exam-countdown" class="text-lg font-black font-mono text-white tracking-wider">02:30:00</span>
-              </div>
-              <span class="text-[10px] font-bold text-emerald-300 bg-emerald-950/80 px-2.5 py-1 rounded-lg border border-emerald-500/40">
-                Pass: 60/100 (60%) → Certificate
-              </span>
-            </div>
-
-            <div class="pt-1 flex flex-wrap gap-2">
-              <button type="button" onclick="startCurrentModeExam(false)" class="px-3.5 py-2 rounded-xl bg-amber-400 text-indigo-950 font-extrabold text-xs">
-                🔄 Generate Fresh Paper
-              </button>
-              <button type="button" onclick="autoFillDemoExam()" class="px-3 py-2 rounded-xl bg-white/15 text-white font-semibold text-[11px]">
-                ⚡ Quick Fill Demo Pass
-              </button>
-            </div>
-          </div>
-
-          <!-- Score & Module-Wise Breakdown Card -->
-          <div id="exam-result-card" class="hidden rounded-2xl p-4 border shadow-sm space-y-2.5"></div>
-
-          <!-- Sticky Question Counter & Submit Bar -->
-          <div class="bg-white rounded-2xl p-3 shadow-sm border border-slate-200 flex items-center justify-between sticky top-0 z-10">
-            <span class="text-xs font-bold text-slate-800">
-              Answered: <span id="exam-answered-count" class="text-indigo-600 font-extrabold">0</span> / <span id="exam-total-q-label">50</span>
+              <span id="exam-answered-count" class="text-indigo-600 font-extrabold">0</span> / <span id="exam-total-q-label">50</span>
             </span>
             <button type="button" onclick="submitActiveExam()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow">
               Submit Exam ✓
@@ -792,14 +794,14 @@
           <div id="exam-questions-container" class="space-y-2.5"></div>
         </div>
 
-        <!-- ==================== TAB 7: ADMIN REAL-TIME USAGE & MASTER CONTROL ==================== -->
+        <!-- ==================== TAB 7: ADMIN REAL-TIME USAGE, LOGO UPLOAD & GOOGLE SHEETS SYNC ==================== -->
         <div id="tab-admin" class="hidden space-y-4">
           <div class="bg-gradient-to-r from-amber-500 to-orange-500 text-indigo-950 rounded-2xl p-4 shadow-md">
             <div class="flex items-center justify-between gap-2">
               <span class="text-[10px] font-extrabold uppercase bg-indigo-950 text-amber-300 px-2.5 py-0.5 rounded-full">
                 Live Telemetry • 195 Chapters
               </span>
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1.5">
                 <button type="button" onclick="togglePwaModal(true)" class="text-[10px] font-extrabold bg-indigo-950 hover:bg-indigo-900 text-white px-2.5 py-1 rounded-lg shadow-sm flex items-center gap-1 transition">
                   <span>📲</span>
                   <span>PWA Files</span>
@@ -811,37 +813,92 @@
             </div>
             <h2 class="text-base font-extrabold mt-1.5">Admin Master &amp; Live Usage Analytics</h2>
             <p class="text-[11px] font-medium text-indigo-950/90">
-              Active sessions, chapters read, audio plays, exams passed aur PWA deployment files.
+              All registered users, active study minutes, Google Spreadsheet sync &amp; custom PWA App Icon.
             </p>
           </div>
 
+          <!-- KPI Cards: Registered Users, Online Today, Active Minutes, MCQs Solved -->
           <div class="grid grid-cols-2 gap-2.5">
             <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200">
-              <span class="text-[10px] font-bold uppercase text-slate-400">Overall App Usage</span>
-              <p id="admin-kpi-total-time" class="text-base font-extrabold text-indigo-700 font-mono mt-0.5">00h 00m 00s</p>
-              <span class="text-[10px] text-emerald-600 font-semibold">● Live Ticking Combined</span>
+              <span class="text-[10px] font-bold uppercase text-slate-400">Total Registered Users</span>
+              <p id="admin-kpi-reg-users" class="text-base font-extrabold text-indigo-700 mt-0.5">0 Users</p>
+              <span id="admin-kpi-active-now" class="text-[10px] text-emerald-600 font-semibold">● 1 Active Online</span>
             </div>
             <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200">
-              <span class="text-[10px] font-bold uppercase text-slate-400">Chapters &amp; Audio</span>
-              <p id="admin-kpi-chapters-audio" class="text-base font-extrabold text-slate-900 mt-0.5">0 Ch • 0 🔊</p>
-              <span id="admin-kpi-active-now" class="text-[10px] text-teal-600 font-semibold">● 1 Online Live</span>
+              <span class="text-[10px] font-bold uppercase text-slate-400">Total Active Study Time</span>
+              <p id="admin-kpi-total-time" class="text-base font-extrabold text-slate-900 font-mono mt-0.5">00h 00m 00s</p>
+              <span id="admin-kpi-active-mins" class="text-[10px] text-teal-600 font-semibold">0 Total Minutes</span>
             </div>
             <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200">
-              <span class="text-[10px] font-bold uppercase text-slate-400">AI Chats &amp; Calls</span>
-              <p id="admin-kpi-ai-count" class="text-base font-extrabold text-amber-600 mt-0.5">0 Interactions</p>
-              <span class="text-[10px] text-slate-500">Voice + Text Tutor</span>
+              <span class="text-[10px] font-bold uppercase text-slate-400">Chapters &amp; MCQs Solved</span>
+              <p id="admin-kpi-chapters-audio" class="text-base font-extrabold text-amber-600 mt-0.5">0 Ch • 0 MCQs</p>
+              <span class="text-[10px] text-slate-500">Tracked Across All Users</span>
             </div>
             <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200">
-              <span class="text-[10px] font-bold uppercase text-slate-400">Exams Passed &amp; Slate</span>
+              <span class="text-[10px] font-bold uppercase text-slate-400">AI Tutor &amp; Certificates</span>
               <p id="admin-kpi-practice-count" class="text-base font-extrabold text-emerald-700 mt-0.5">0 Completed</p>
-              <span class="text-[10px] text-slate-500">Certificates + Slate</span>
+              <span class="text-[10px] text-slate-500">AI + Slate + Expert Certs</span>
             </div>
           </div>
 
+          <!-- Google Sheets Real-Time Sync Configuration Card -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-emerald-200 space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <h3 class="text-xs font-extrabold text-emerald-950">📊 Google Spreadsheet Live Sync</h3>
+                <p class="text-[10px] text-slate-500">Users ka registration, working aur active time seedha aapki Google Sheet par save hoga.</p>
+              </div>
+              <button type="button" onclick="toggleGsheetModal(true)" class="text-[10px] font-extrabold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-1 rounded-lg shrink-0">
+                📜 Get code.gs
+              </button>
+            </div>
+            <div class="flex gap-1.5">
+              <input id="gsheet-webhook-input" type="url" placeholder="Paste Google Apps Script Web App URL (https://script.google.com/macros/s/.../exec)"
+                class="flex-1 text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              <button type="button" onclick="saveGoogleSheetUrl()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shrink-0">
+                Save URL
+              </button>
+            </div>
+            <div class="flex items-center justify-between pt-0.5">
+              <span id="gsheet-sync-status" class="text-[10px] font-bold text-slate-500">Status: LocalStorage Active (Paste URL for Cloud Sheet)</span>
+              <div class="flex gap-1.5">
+                <button type="button" onclick="syncAllUsersToGoogleSheet(true)" class="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-lg border border-indigo-200">
+                  🔄 Sync Now
+                </button>
+                <button type="button" onclick="exportUsersReportCsv()" class="text-[10px] font-bold bg-amber-50 text-amber-900 px-2.5 py-1 rounded-lg border border-amber-200">
+                  ⬇️ Export CSV
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upload Brand Logo & Installed PWA App Icon Card -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-indigo-200 space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <img id="admin-logo-preview" alt="Brand Icon" class="w-11 h-11 rounded-2xl border border-slate-200 object-cover shadow-sm" />
+                <div>
+                  <h3 class="text-xs font-extrabold text-slate-900">🖼️ Brand Logo &amp; Installed App Icon</h3>
+                  <p class="text-[10px] text-slate-500">PNG/JPG upload karein — Header Logo aur Installed PWA App Icon (192x192 &amp; 512x512) dono update honge.</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="flex-1 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs text-center cursor-pointer shadow-sm">
+                📤 Upload Logo Image (PNG/JPG)
+                <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onchange="handleLogoUpload(event)" class="hidden" />
+              </label>
+              <button type="button" onclick="resetCustomBrandLogo()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">
+                Reset Default
+              </button>
+            </div>
+          </div>
+
+          <!-- Per-User Working & Active Time Report Table -->
           <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
             <div class="flex items-center justify-between">
-              <h3 class="text-xs font-extrabold text-slate-900">👥 Per-User Live App Usage Breakdown</h3>
-              <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">1s Live Sync</span>
+              <h3 class="text-xs font-extrabold text-slate-900">👥 Per-User Registration, Working &amp; Active Time Report</h3>
+              <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">30s Auto-Sync</span>
             </div>
             <div id="admin-users-usage-list" class="space-y-2.5"></div>
           </div>
@@ -905,23 +962,101 @@
   </div>
 
   <script>
-    // ==================== PWA MANIFEST & SERVICE WORKER ====================
-    const MANIFEST_JSON_OBJ = {
-      name: "VaniSetu - AI Based Learning App",
-      short_name: "VaniSetu",
-      description: "Learn Smart. Speak Confidently.",
-      start_url: "./index.html",
-      display: "standalone",
-      orientation: "portrait",
-      background_color: "#1e1b4b",
-      theme_color: "#1e1b4b",
-      icons: [
-        { src: "https://placehold.co/192x192/1e1b4b/fbbf24?text=VaniSetu", sizes: "192x192", type: "image/png" },
-        { src: "https://placehold.co/512x512/1e1b4b/fbbf24?text=VaniSetu", sizes: "512x512", type: "image/png" }
-      ]
-    };
+    // ==================== CUSTOM BRAND LOGO & DYNAMIC PWA MANIFEST / SERVICE WORKER ====================
+    const LOGO_STORAGE_KEY = 'vanisetu_custom_logo';
+    const GSHEET_URL_KEY = 'vanisetu_gsheet_url';
+    const USERS_REGISTRY_KEY = 'vanisetu_registered_users_v9';
 
-    const SW_JS_CODE = `const CACHE_NAME = 'vanisetu-pwa-v8';
+    function generateDefaultEmblemDataUrl(size = 512) {
+      const c = document.createElement('canvas');
+      c.width = size;
+      c.height = size;
+      const ctx = c.getContext('2d');
+      const r = size * 0.22;
+
+      // Rich Indigo-to-Royal-Blue gradient square with rounded corners
+      const grad = ctx.createLinearGradient(0, 0, size, size);
+      grad.addColorStop(0, '#1e1b4b');
+      grad.addColorStop(0.55, '#312e81');
+      grad.addColorStop(1, '#1d4ed8');
+
+      ctx.beginPath();
+      ctx.moveTo(r, 0);
+      ctx.lineTo(size - r, 0);
+      ctx.quadraticCurveTo(size, 0, size, r);
+      ctx.lineTo(size, size - r);
+      ctx.quadraticCurveTo(size, size, size - r, size);
+      ctx.lineTo(r, size);
+      ctx.quadraticCurveTo(0, size, 0, size - r);
+      ctx.lineTo(0, r);
+      ctx.quadraticCurveTo(0, 0, r, 0);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Golden inner border ring
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = Math.max(4, size * 0.025);
+      ctx.stroke();
+
+      // Radiant sun-arch motif behind emblem
+      ctx.beginPath();
+      ctx.arc(size * 0.5, size * 0.56, size * 0.31, Math.PI, 0, false);
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.38)';
+      ctx.lineWidth = Math.max(3, size * 0.018);
+      ctx.stroke();
+
+      // Trilingual Devanagari + Latin Emblem ("वाS")
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = `900 ${Math.round(size * 0.36)}px 'Noto Sans Devanagari', 'Inter', sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('वाS', size * 0.5, size * 0.48);
+
+      // Subtitle ribbon
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `800 ${Math.round(size * 0.105)}px 'Inter', sans-serif`;
+      ctx.fillText('VANISETU', size * 0.5, size * 0.77);
+
+      return c.toDataURL('image/png');
+    }
+
+    function createResizedPngIcon(imgSrc, targetSize) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const c = document.createElement('canvas');
+          c.width = targetSize;
+          c.height = targetSize;
+          const ctx = c.getContext('2d');
+          ctx.drawImage(img, 0, 0, targetSize, targetSize);
+          resolve(c.toDataURL('image/png'));
+        };
+        img.onerror = () => resolve(generateDefaultEmblemDataUrl(targetSize));
+        img.src = imgSrc;
+      });
+    }
+
+    function buildManifestObject(icon192, icon512) {
+      return {
+        name: "VaniSetu — Learn Smart. Speak Confidently.",
+        short_name: "VaniSetu",
+        description: "Trilingual AI Learning PWA (English, Hindi, Sanskrit) with 195 Chapters, 975 Graded MCQs, Indian TTS, 3-Tier ShabdKosh & 100-MCQ Final Exam.",
+        version: "6.0.0",
+        start_url: "./index.html",
+        scope: "./",
+        display: "standalone",
+        orientation: "portrait",
+        background_color: "#1e1b4b",
+        theme_color: "#1e1b4b",
+        icons: [
+          { src: icon192, sizes: "192x192", type: "image/png", purpose: "any maskable" },
+          { src: icon512, sizes: "512x512", type: "image/png", purpose: "any maskable" }
+        ]
+      };
+    }
+
+    const SW_JS_CODE = `const CACHE_NAME = 'vanisetu-pwa-v9';
 const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', (e) => {
@@ -951,15 +1086,123 @@ self.addEventListener('fetch', (e) => {
   );
 });`;
 
-    (function initPwaResources() {
-      const blob = new Blob([JSON.stringify(MANIFEST_JSON_OBJ)], { type: 'application/json' });
-      document.getElementById('pwa-manifest-link').setAttribute('href', URL.createObjectURL(blob));
-      document.getElementById('manifest-code-box').value = JSON.stringify(MANIFEST_JSON_OBJ, null, 2);
-      document.getElementById('sw-code-box').value = SW_JS_CODE;
-    })();
+    const GSHEET_APPS_SCRIPT_CODE = `// VaniSetu — Google Apps Script Web App (code.gs)
+// Automatically creates/updates 'Users_Report' sheet with every user's registration, working & active time.
+
+function doPost(e) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('Users_Report');
+    if (!sheet) {
+      sheet = ss.insertSheet('Users_Report');
+      sheet.appendRow([
+        'Email', 'Full Name', 'Role', 'Registration Date',
+        'Last Active', 'Total Active Minutes', 'Active Seconds',
+        'Chapters Completed', 'MCQs Attempted', 'EN Final Best',
+        'HI Final Best', 'SA Final Best', 'Event Type'
+      ]);
+      sheet.getRange(1, 1, 1, 13).setFontWeight('bold').setBackground('#1e1b4b').setFontColor('#ffffff');
+    }
+
+    var data = JSON.parse(e.postData.contents);
+    var rows = sheet.getDataRange().getValues();
+    var foundRow = -1;
+
+    for (var i = 1; i < rows.length; i++) {
+      if (String(rows[i][0]).toLowerCase() === String(data.email).toLowerCase()) {
+        foundRow = i + 1;
+        break;
+      }
+    }
+
+    var activeMins = Math.round(((data.totalSeconds || 0) / 60) * 10) / 10;
+    var rowValues = [
+      data.email || '',
+      data.name || '',
+      data.role || 'student',
+      data.registeredAt || '',
+      data.lastActiveFormatted || new Date().toLocaleString(),
+      activeMins,
+      data.totalSeconds || 0,
+      data.chaptersRead || 0,
+      data.mcqsAttempted || 0,
+      data.enFinalBest || 0,
+      data.hiFinalBest || 0,
+      data.saFinalBest || 0,
+      data.eventType || 'sync'
+    ];
+
+    if (foundRow > 0) {
+      sheet.getRange(foundRow, 1, 1, rowValues.length).setValues([rowValues]);
+    } else {
+      sheet.appendRow(rowValues);
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({ status: 'ok' })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+
+    async function applyBrandLogoAndManifest() {
+      const savedLogo = localStorage.getItem(LOGO_STORAGE_KEY);
+      const baseImg = savedLogo || generateDefaultEmblemDataUrl(512);
+      const icon192 = await createResizedPngIcon(baseImg, 192);
+      const icon512 = await createResizedPngIcon(baseImg, 512);
+
+      ['login-brand-logo', 'header-brand-logo', 'admin-logo-preview'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.src = icon192;
+      });
+
+      const appleLink = document.getElementById('apple-touch-icon-link');
+      const favLink = document.getElementById('favicon-icon-link');
+      if (appleLink) appleLink.href = icon192;
+      if (favLink) favLink.href = icon192;
+
+      const manifestObj = buildManifestObject(icon192, icon512);
+      const blob = new Blob([JSON.stringify(manifestObj)], { type: 'application/json' });
+      const manifestLink = document.getElementById('pwa-manifest-link');
+      if (manifestLink) manifestLink.setAttribute('href', URL.createObjectURL(blob));
+
+      const manifestBox = document.getElementById('manifest-code-box');
+      const swBox = document.getElementById('sw-code-box');
+      const gsBox = document.getElementById('gsheet-code-box');
+      if (manifestBox) manifestBox.value = JSON.stringify(manifestObj, null, 2);
+      if (swBox) swBox.value = SW_JS_CODE;
+      if (gsBox) gsBox.value = GSHEET_APPS_SCRIPT_CODE;
+    }
+
+    function handleLogoUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const dataUrl = e.target.result;
+        const resized512 = await createResizedPngIcon(dataUrl, 512);
+        try {
+          localStorage.setItem(LOGO_STORAGE_KEY, resized512);
+          await applyBrandLogoAndManifest();
+          showToast("Brand Logo & Installed App Icon (192x192 & 512x512) update ho gaya!");
+        } catch (err) {
+          showToast("Image size zyada badi hai; chhoti PNG/JPG upload karein.");
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function resetCustomBrandLogo() {
+      localStorage.removeItem(LOGO_STORAGE_KEY);
+      await applyBrandLogoAndManifest();
+      showToast("Default VaniSetu emblem restore kar diya gaya hai.");
+    }
 
     function togglePwaModal(show) {
       document.getElementById('pwa-modal').classList.toggle('hidden', !show);
+    }
+
+    function toggleGsheetModal(show) {
+      document.getElementById('gsheet-modal').classList.toggle('hidden', !show);
     }
 
     function copyCodeBlock(id) {
@@ -2925,14 +3168,15 @@ self.addEventListener('fetch', (e) => {
 
     // ==================== STORAGE KEYS & REAL-TIME TELEMETRY ====================
     const KEYS = {
-      ACTIVE_USER: 'vanisetu_active_session_v8',
-      SAVED_ACCOUNTS: 'vanisetu_saved_accounts_v8',
-      BIOMETRIC_USER: 'vanisetu_biometric_v8',
-      USAGE_DB: 'vanisetu_usage_telemetry_v8'
+      ACTIVE_USER: 'vanisetu_active_session_v9',
+      SAVED_ACCOUNTS: 'vanisetu_saved_accounts_v9',
+      BIOMETRIC_USER: 'vanisetu_biometric_v9',
+      USAGE_DB: 'vanisetu_usage_telemetry_v9'
     };
 
     const APP_STATE = {
       user: null,
+      authMode: 'signin',
       activeLang: 'english',
       activeChapterIndex: 0,
       dropdownOpen: false,
@@ -2959,55 +3203,47 @@ self.addEventListener('fetch', (e) => {
     function getUsageDatabase() {
       const raw = localStorage.getItem(KEYS.USAGE_DB);
       if (raw) { try { return JSON.parse(raw); } catch (e) {} }
-      const initialDb = {
-        "student@vanisetu.com": {
-          email: "student@vanisetu.com", name: "Ritesh (Student)", role: "student",
-          totalSeconds: 2140, sessions: 5, chaptersRead: 14, audioPlays: 32,
-          aiInteractions: 16, writingSheets: 7, dictSearches: 11,
-          bestExamScore: 38, enFinalBest: 0, enCertified: false,
-          hiFinalBest: 0, hiCertified: false, saFinalBest: 0, saCertified: false,
-          unlockedLevel: 2, lastActive: Date.now() - 90000
-        },
-        "aarav.sharma@school.in": {
-          email: "aarav.sharma@school.in", name: "Aarav Sharma (Class 10)", role: "student",
-          totalSeconds: 4120, sessions: 9, chaptersRead: 42, audioPlays: 88,
-          aiInteractions: 26, writingSheets: 12, dictSearches: 19,
-          bestExamScore: 44, enFinalBest: 82, enCertified: true,
-          hiFinalBest: 86, hiCertified: true, saFinalBest: 78, saCertified: true,
-          unlockedLevel: 5, lastActive: Date.now() - 40000
-        },
-        "admin@vanisetu.com": {
-          email: "admin@vanisetu.com", name: "Super Admin", role: "admin",
-          totalSeconds: 5280, sessions: 12, chaptersRead: 195, audioPlays: 140,
-          aiInteractions: 38, writingSheets: 8, dictSearches: 28,
-          bestExamScore: 50, enFinalBest: 96, enCertified: true,
-          hiFinalBest: 98, hiCertified: true, saFinalBest: 95, saCertified: true,
-          unlockedLevel: 12, lastActive: Date.now()
-        }
-      };
-      localStorage.setItem(KEYS.USAGE_DB, JSON.stringify(initialDb));
-      return initialDb;
+      return {};
     }
 
     function saveUsageDatabase(db) { localStorage.setItem(KEYS.USAGE_DB, JSON.stringify(db)); }
 
-    function ensureUserInUsageDb(userObj) {
+    function ensureUserInUsageDb(userObj, isNewRegistration = false) {
       const db = getUsageDatabase();
+      const nowIso = new Date().toLocaleString('en-IN');
       if (!db[userObj.email]) {
         db[userObj.email] = {
-          email: userObj.email, name: userObj.name || userObj.email.split('@')[0], role: userObj.role || 'student',
-          totalSeconds: 0, sessions: 1, chaptersRead: 0, audioPlays: 0,
-          aiInteractions: 0, writingSheets: 0, dictSearches: 0,
-          bestExamScore: 0, enFinalBest: 0, enCertified: false,
-          hiFinalBest: 0, hiCertified: false, saFinalBest: 0, saCertified: false,
-          unlockedLevel: userObj.role === 'admin' ? 12 : 1, lastActive: Date.now()
+          email: userObj.email,
+          name: userObj.name || userObj.email.split('@')[0],
+          role: userObj.role || 'student',
+          registeredAt: nowIso,
+          lastActiveFormatted: nowIso,
+          totalSeconds: 0,
+          sessions: 1,
+          chaptersRead: 0,
+          mcqsAttempted: 0,
+          audioPlays: 0,
+          aiInteractions: 0,
+          writingSheets: 0,
+          dictSearches: 0,
+          bestExamScore: 0,
+          enFinalBest: 0,
+          enCertified: false,
+          hiFinalBest: 0,
+          hiCertified: false,
+          saFinalBest: 0,
+          saCertified: false,
+          unlockedLevel: userObj.role === 'admin' ? 12 : 1,
+          lastActive: Date.now()
         };
       } else {
-        db[userObj.email].sessions += 1;
+        db[userObj.email].sessions = (db[userObj.email].sessions || 0) + 1;
         db[userObj.email].lastActive = Date.now();
+        db[userObj.email].lastActiveFormatted = nowIso;
         if (userObj.name) db[userObj.email].name = userObj.name;
       }
       saveUsageDatabase(db);
+      syncUserRecordToGoogleSheet(db[userObj.email], isNewRegistration ? 'registration' : 'login');
       return db[userObj.email];
     }
 
@@ -3018,9 +3254,78 @@ self.addEventListener('fetch', (e) => {
       if (rec) {
         rec[metricKey] = (rec[metricKey] || 0) + amount;
         rec.lastActive = Date.now();
+        rec.lastActiveFormatted = new Date().toLocaleString('en-IN');
         saveUsageDatabase(db);
+        if (metricKey === 'mcqsAttempted' || metricKey === 'chaptersRead') {
+          syncUserRecordToGoogleSheet(rec, metricKey);
+        }
         if (APP_STATE.user.role === 'admin') renderAdminAnalytics();
       }
+    }
+
+    function saveGoogleSheetUrl() {
+      const url = (document.getElementById('gsheet-webhook-input').value || '').trim();
+      if (!url) {
+        localStorage.removeItem(GSHEET_URL_KEY);
+        document.getElementById('gsheet-sync-status').textContent = 'Status: LocalStorage Active (No Sheet URL)';
+        showToast("Google Sheet URL हटा दिया गया है।");
+        return;
+      }
+      localStorage.setItem(GSHEET_URL_KEY, url);
+      document.getElementById('gsheet-sync-status').textContent = 'Status: ✅ Connected to Google Spreadsheet';
+      showToast("Google Spreadsheet Web App URL save ho gaya! Syncing now...");
+      syncAllUsersToGoogleSheet(true);
+    }
+
+    function syncUserRecordToGoogleSheet(userRec, eventType = 'heartbeat') {
+      const sheetUrl = localStorage.getItem(GSHEET_URL_KEY);
+      if (!sheetUrl || !userRec) return;
+      try {
+        fetch(sheetUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ ...userRec, eventType })
+        }).catch(() => {});
+      } catch (e) {}
+    }
+
+    function syncAllUsersToGoogleSheet(notify = false) {
+      const sheetUrl = localStorage.getItem(GSHEET_URL_KEY);
+      if (!sheetUrl) {
+        if (notify) showToast("Pehle upar box mein apna Google Apps Script Web App URL paste karein!");
+        return;
+      }
+      const users = Object.values(getUsageDatabase());
+      users.forEach(u => syncUserRecordToGoogleSheet(u, 'manual_sync'));
+      document.getElementById('gsheet-sync-status').textContent = `Status: ✅ Synced ${users.length} users at ${new Date().toLocaleTimeString()}`;
+      if (notify) showToast(`${users.length} users ka data Google Spreadsheet par bhej diya gaya hai!`);
+    }
+
+    function exportUsersReportCsv() {
+      const users = Object.values(getUsageDatabase());
+      const headers = ['Email', 'Full Name', 'Role', 'Registration Date', 'Last Active', 'Active Minutes', 'Active Seconds', 'Chapters Read', 'MCQs Attempted', 'EN Final Best', 'HI Final Best', 'SA Final Best'];
+      const rows = users.map(u => [
+        u.email,
+        `"${(u.name || '').replace(/"/g, '""')}"`,
+        u.role,
+        `"${u.registeredAt || ''}"`,
+        `"${u.lastActiveFormatted || ''}"`,
+        (Math.round(((u.totalSeconds || 0) / 60) * 10) / 10),
+        u.totalSeconds || 0,
+        u.chaptersRead || 0,
+        u.mcqsAttempted || 0,
+        u.enFinalBest || 0,
+        u.hiFinalBest || 0,
+        u.saFinalBest || 0
+      ]);
+      const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `VaniSetu-Users-Report-${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      showToast("Users Active Time & Working Report CSV download ho gayi!");
     }
 
     function formatDuration(totalSecs) {
@@ -3045,28 +3350,59 @@ self.addEventListener('fetch', (e) => {
         if (!APP_STATE.user) return;
         APP_STATE.sessionSeconds++;
         const db = getUsageDatabase();
-        if (db[APP_STATE.user.email]) {
-          db[APP_STATE.user.email].totalSeconds += 1;
-          db[APP_STATE.user.email].lastActive = Date.now();
+        const rec = db[APP_STATE.user.email];
+        if (rec) {
+          rec.totalSeconds = (rec.totalSeconds || 0) + 1;
+          rec.lastActive = Date.now();
+          rec.lastActiveFormatted = new Date().toLocaleString('en-IN');
           saveUsageDatabase(db);
+          // Sync active time heartbeat to Google Sheets every 30 seconds
+          if (APP_STATE.sessionSeconds % 30 === 0) {
+            syncUserRecordToGoogleSheet(rec, 'active_timer_30s');
+          }
         }
         if (APP_STATE.user.role === 'admin') renderAdminAnalytics();
       }, 1000);
     }
 
-    // ==================== LOGIN, SAVED CREDENTIALS & BIOMETRICS ====================
+    // ==================== UNIFIED SINGLE LOGIN, SIGN-UP & BIOMETRICS ====================
+    function getRegisteredUsersList() {
+      try { return JSON.parse(localStorage.getItem(USERS_REGISTRY_KEY) || '[]'); } catch (e) { return []; }
+    }
+
+    function saveRegisteredUser(userObj) {
+      const list = getRegisteredUsersList();
+      const idx = list.findIndex(u => u.email === userObj.email);
+      if (idx >= 0) list[idx] = userObj;
+      else list.push(userObj);
+      localStorage.setItem(USERS_REGISTRY_KEY, JSON.stringify(list));
+    }
+
+    function setAuthMode(mode) {
+      APP_STATE.authMode = mode;
+      const isSignup = mode === 'signup';
+      document.getElementById('signup-name-wrapper').classList.toggle('hidden', !isSignup);
+      document.getElementById('login-name').required = isSignup;
+      document.getElementById('auth-card-heading').textContent = isSignup ? 'Create New User Account' : 'Sign In to VaniSetu';
+      document.getElementById('auth-submit-btn').textContent = isSignup ? 'Create Account & Start Learning →' : 'Login & Enter VaniSetu →';
+
+      document.getElementById('auth-mode-signin-btn').className = !isSignup
+        ? 'py-1.5 rounded-lg text-xs font-extrabold bg-white text-indigo-700 shadow-sm'
+        : 'py-1.5 rounded-lg text-xs font-bold text-slate-600';
+      document.getElementById('auth-mode-signup-btn').className = isSignup
+        ? 'py-1.5 rounded-lg text-xs font-extrabold bg-white text-indigo-700 shadow-sm'
+        : 'py-1.5 rounded-lg text-xs font-bold text-slate-600';
+    }
+
     function renderSavedAccountsChips() {
       let accounts = [];
       try { accounts = JSON.parse(localStorage.getItem(KEYS.SAVED_ACCOUNTS) || '[]'); } catch (e) {}
-      if (!accounts.length) {
-        accounts = [
-          { email: 'student@vanisetu.com', pass: 'learn123', role: 'student', name: 'Student Demo' },
-          { email: 'admin@vanisetu.com', pass: 'admin123', role: 'admin', name: 'Admin Master' }
-        ];
-        localStorage.setItem(KEYS.SAVED_ACCOUNTS, JSON.stringify(accounts));
-      }
       const box = document.getElementById('saved-accounts-box');
       const list = document.getElementById('saved-accounts-list');
+      if (!accounts.length) {
+        box.classList.add('hidden');
+        return;
+      }
       box.classList.remove('hidden');
       list.innerHTML = accounts.map((acc, idx) => `
         <button type="button" onclick="loginWithSavedAccount(${idx})"
@@ -3088,19 +3424,7 @@ self.addEventListener('fetch', (e) => {
 
     function loginWithSavedAccount(idx) {
       const accounts = JSON.parse(localStorage.getItem(KEYS.SAVED_ACCOUNTS) || '[]');
-      if (accounts[idx]) completeSignIn(accounts[idx], true);
-    }
-
-    function fillCredentials(type) {
-      if (type === 'admin') {
-        document.getElementById('login-name').value = 'Super Admin';
-        document.getElementById('login-id').value = 'admin@vanisetu.com';
-        document.getElementById('login-pass').value = 'admin123';
-      } else {
-        document.getElementById('login-name').value = 'Ritesh (Student)';
-        document.getElementById('login-id').value = 'student@vanisetu.com';
-        document.getElementById('login-pass').value = 'learn123';
-      }
+      if (accounts[idx]) completeSignIn(accounts[idx], true, false);
     }
 
     function handleLogin(e) {
@@ -3110,16 +3434,46 @@ self.addEventListener('fetch', (e) => {
       const pass = document.getElementById('login-pass').value.trim();
       const saveCreds = document.getElementById('always-login-checkbox').checked;
 
+      if (!email || pass.length < 4) {
+        showToast("Kripya sahi Email aur Password (kam se kam 4 akshar) dalein.");
+        return;
+      }
+
+      // Automatic Admin Role Detection on Admin Credentials
       if (email === 'admin@vanisetu.com' && pass === 'admin123') {
-        completeSignIn({ email, pass, role: 'admin', name: nameInput || 'Super Admin' }, saveCreds);
-      } else if (email && pass.length >= 4) {
-        completeSignIn({ email, pass, role: 'student', name: nameInput || email.split('@')[0] }, saveCreds);
+        completeSignIn({ email, pass, role: 'admin', name: nameInput || 'Super Admin' }, saveCreds, false);
+        return;
+      }
+
+      const regUsers = getRegisteredUsersList();
+      const existingUser = regUsers.find(u => u.email === email);
+
+      if (APP_STATE.authMode === 'signup') {
+        if (!nameInput) {
+          showToast("Kripya apna Full Name bharein.");
+          return;
+        }
+        const newUser = { email, pass, role: 'student', name: nameInput };
+        saveRegisteredUser(newUser);
+        completeSignIn(newUser, saveCreds, true);
+        showToast(`Swagat hai ${nameInput}! Aapka account ban gaya hai.`);
       } else {
-        showToast("Kripya sahi Email aur Password dalein.");
+        if (existingUser) {
+          if (existingUser.pass !== pass) {
+            showToast("Galat Password! Kripya sahi password dalein.");
+            return;
+          }
+          completeSignIn(existingUser, saveCreds, false);
+        } else {
+          // Seamless first-time user login registration
+          const newUser = { email, pass, role: 'student', name: email.split('@')[0] };
+          saveRegisteredUser(newUser);
+          completeSignIn(newUser, saveCreds, true);
+        }
       }
     }
 
-    function completeSignIn(userObj, persistAlways = true) {
+    function completeSignIn(userObj, persistAlways = true, isNewRegistration = false) {
       APP_STATE.user = userObj;
       if (persistAlways) {
         localStorage.setItem(KEYS.ACTIVE_USER, JSON.stringify(userObj));
@@ -3128,7 +3482,7 @@ self.addEventListener('fetch', (e) => {
         localStorage.removeItem(KEYS.ACTIVE_USER);
       }
 
-      const userRecord = ensureUserInUsageDb(userObj);
+      const userRecord = ensureUserInUsageDb(userObj, isNewRegistration);
       APP_STATE.unlockedLevel = userObj.role === 'admin' ? 12 : (userRecord.unlockedLevel || 1);
       APP_STATE.examStats.english.bestScore = userRecord.bestExamScore || 0;
       APP_STATE.examStats.english.finalExpertBest = userRecord.enFinalBest || 0;
@@ -3143,7 +3497,6 @@ self.addEventListener('fetch', (e) => {
       document.getElementById('home-user-greeting').textContent = userObj.name;
 
       const roleBadge = document.getElementById('role-badge');
-      const adminBanner = document.getElementById('admin-master-banner');
       const navAdmin = document.getElementById('nav-admin');
       const homeLvl = document.getElementById('home-level-badge');
 
@@ -3153,8 +3506,13 @@ self.addEventListener('fetch', (e) => {
         roleBadge.textContent = 'ADMIN MASTER';
         roleBadge.className = 'text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-amber-400 text-indigo-950';
         homeLvl.textContent = '195 Chapters Unlocked';
-        adminBanner.classList.remove('hidden');
         navAdmin.classList.remove('hidden');
+        const savedSheetUrl = localStorage.getItem(GSHEET_URL_KEY) || '';
+        const urlInput = document.getElementById('gsheet-webhook-input');
+        if (urlInput) urlInput.value = savedSheetUrl;
+        if (savedSheetUrl) {
+          document.getElementById('gsheet-sync-status').textContent = 'Status: ✅ Connected to Google Spreadsheet';
+        }
         renderAdminAnalytics();
       } else {
         roleBadge.textContent = anyCertified ? '🏆 EXPERT' : 'STUDENT';
@@ -3162,7 +3520,6 @@ self.addEventListener('fetch', (e) => {
           ? 'text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-amber-400 text-indigo-950'
           : 'text-[9px] font-bold px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/30';
         homeLvl.textContent = `Module ${APP_STATE.unlockedLevel} Active`;
-        adminBanner.classList.add('hidden');
         navAdmin.classList.add('hidden');
       }
 
@@ -3179,13 +3536,10 @@ self.addEventListener('fetch', (e) => {
       } catch (e) {}
       const savedBio = localStorage.getItem(KEYS.BIOMETRIC_USER);
       if (savedBio) {
-        completeSignIn(JSON.parse(savedBio), true);
-        showToast("WebAuthn Biometric Verified! Auto-login successful.");
+        completeSignIn(JSON.parse(savedBio), true, false);
+        showToast("Biometric Verified! Login successful.");
       } else {
-        const defaultBio = { email: 'student@vanisetu.com', pass: 'learn123', role: 'student', name: 'Biometric Scholar' };
-        localStorage.setItem(KEYS.BIOMETRIC_USER, JSON.stringify(defaultBio));
-        completeSignIn(defaultBio, true);
-        showToast("Fingerprint / Face ID Verified!");
+        showToast("Pehle ek baar Email/Password se login karein aur upar 👆 icon dabakar Biometrics save karein.");
       }
     }
 
@@ -3552,6 +3906,7 @@ self.addEventListener('fetch', (e) => {
         if (chosen && parseInt(chosen.value, 10) === m.ans) score++;
         document.getElementById(`active-ch-exp-${mIdx}`).classList.remove('hidden');
       });
+      incrementUsageMetric('mcqsAttempted', item.mcqs.length);
       const resBox = document.getElementById('active-ch-mcq-result');
       resBox.classList.remove('hidden');
       resBox.innerHTML = `🎯 ${prefix} ${item.ch} Score: <strong>${score} / ${item.mcqs.length}</strong> (${Math.round((score / item.mcqs.length) * 100)}%) — Answers &amp; explanations revealed below!`;
@@ -4307,6 +4662,7 @@ self.addEventListener('fetch', (e) => {
       const total = APP_STATE.examQuestions.length;
       const stats = APP_STATE.examStats[lang];
       if (isFinal && APP_STATE.finalTimerInterval) clearInterval(APP_STATE.finalTimerInterval);
+      incrementUsageMetric('mcqsAttempted', Object.keys(APP_STATE.examAnswers).length || total);
 
       let correct = 0;
       const modStats = {};
@@ -4498,29 +4854,37 @@ self.addEventListener('fetch', (e) => {
       const db = getUsageDatabase();
       const users = Object.values(db);
 
-      let totalSecondsAll = 0, totalChaptersAll = 0, totalAudioAll = 0, totalAiAll = 0, totalExamsAll = 0, onlineCount = 0;
+      let totalSecondsAll = 0, totalChaptersAll = 0, totalMcqsAll = 0, totalExamsAll = 0, onlineCount = 0;
       const now = Date.now();
 
       users.forEach(u => {
         totalSecondsAll += (u.totalSeconds || 0);
         totalChaptersAll += (u.chaptersRead || 0);
-        totalAudioAll += (u.audioPlays || 0);
-        totalAiAll += (u.aiInteractions || 0);
-        totalExamsAll += (u.writingSheets || 0) + (u.bestExamScore >= 25 ? 1 : 0) + (u.enCertified ? 1 : 0) + (u.hiCertified ? 1 : 0) + (u.saCertified ? 1 : 0);
-        if (now - (u.lastActive || 0) < 15000) onlineCount++;
+        totalMcqsAll += (u.mcqsAttempted || 0);
+        totalExamsAll += (u.writingSheets || 0) + (u.aiInteractions || 0) + (u.enCertified ? 1 : 0) + (u.hiCertified ? 1 : 0) + (u.saCertified ? 1 : 0);
+        if (now - (u.lastActive || 0) < 35000) onlineCount++;
       });
 
+      const totalMinsAll = Math.round((totalSecondsAll / 60) * 10) / 10;
+      document.getElementById('admin-kpi-reg-users').textContent = `${users.length} Users`;
+      document.getElementById('admin-kpi-active-now').textContent = `● ${Math.max(1, onlineCount)} Online Active`;
       document.getElementById('admin-kpi-total-time').textContent = formatDuration(totalSecondsAll);
-      document.getElementById('admin-kpi-chapters-audio').textContent = `${totalChaptersAll} Ch • ${totalAudioAll} 🔊`;
-      document.getElementById('admin-kpi-active-now').textContent = `● ${Math.max(1, onlineCount)} Active Sessions`;
-      document.getElementById('admin-kpi-ai-count').textContent = `${totalAiAll} Interactions`;
-      document.getElementById('admin-kpi-practice-count').textContent = `${totalExamsAll} Passed/Saved`;
+      document.getElementById('admin-kpi-active-mins').textContent = `${totalMinsAll} Total Active Mins`;
+      document.getElementById('admin-kpi-chapters-audio').textContent = `${totalChaptersAll} Ch • ${totalMcqsAll} MCQs`;
+      document.getElementById('admin-kpi-practice-count').textContent = `${totalExamsAll} Activities`;
 
-      document.getElementById('admin-users-usage-list').innerHTML = users
+      const listEl = document.getElementById('admin-users-usage-list');
+      if (!users.length) {
+        listEl.innerHTML = `<p class="text-xs text-slate-500 text-center py-3">Abhi tak koi user registered nahi hai.</p>`;
+        return;
+      }
+
+      listEl.innerHTML = users
         .sort((a, b) => (b.lastActive || 0) - (a.lastActive || 0))
         .map(u => {
-          const isOnline = (now - (u.lastActive || 0)) < 15000;
+          const isOnline = (now - (u.lastActive || 0)) < 35000;
           const sharePct = totalSecondsAll > 0 ? Math.round(((u.totalSeconds || 0) / totalSecondsAll) * 100) : 0;
+          const userMins = Math.round(((u.totalSeconds || 0) / 60) * 10) / 10;
           return `
             <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
               <div class="flex items-start justify-between">
@@ -4534,7 +4898,7 @@ self.addEventListener('fetch', (e) => {
                     ${u.hiCertified ? '<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-800">🏆 HI</span>' : ''}
                     ${u.saCertified ? '<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800">🏆 SA</span>' : ''}
                   </div>
-                  <p class="text-[10px] text-slate-500">${u.email}</p>
+                  <p class="text-[10px] text-slate-500">${u.email} • Joined: ${u.registeredAt || 'Today'}</p>
                 </div>
                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isOnline ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}">
                   ${isOnline ? '● Online Live' : 'Offline'}
@@ -4543,20 +4907,20 @@ self.addEventListener('fetch', (e) => {
 
               <div class="grid grid-cols-4 gap-1.5 text-center bg-white p-2 rounded-xl border border-slate-200/80">
                 <div>
-                  <p class="text-[9px] text-slate-400 font-bold">TIME</p>
-                  <p class="text-[11px] font-extrabold text-indigo-700 font-mono">${formatDuration(u.totalSeconds || 0)}</p>
+                  <p class="text-[9px] text-slate-400 font-bold">ACTIVE TIME</p>
+                  <p class="text-[11px] font-extrabold text-indigo-700 font-mono">${userMins}m (${formatDuration(u.totalSeconds || 0)})</p>
                 </div>
                 <div>
-                  <p class="text-[9px] text-slate-400 font-bold">CH / AUDIO</p>
-                  <p class="text-[11px] font-extrabold text-teal-700">${u.chaptersRead || 0} / ${u.audioPlays || 0}</p>
+                  <p class="text-[9px] text-slate-400 font-bold">CH / MCQs</p>
+                  <p class="text-[11px] font-extrabold text-teal-700">${u.chaptersRead || 0} / ${u.mcqsAttempted || 0}</p>
                 </div>
                 <div>
-                  <p class="text-[9px] text-slate-400 font-bold">EN/HI/SA</p>
+                  <p class="text-[9px] text-slate-400 font-bold">EXAMS (E/H/S)</p>
                   <p class="text-[10px] font-extrabold text-emerald-700">${u.enFinalBest || 0}/${u.hiFinalBest || 0}/${u.saFinalBest || 0}</p>
                 </div>
                 <div>
-                  <p class="text-[9px] text-slate-400 font-bold">AI + SLATE</p>
-                  <p class="text-[11px] font-extrabold text-slate-800">${(u.aiInteractions || 0) + (u.writingSheets || 0)}</p>
+                  <p class="text-[9px] text-slate-400 font-bold">SESSIONS</p>
+                  <p class="text-[11px] font-extrabold text-slate-800">${u.sessions || 1}</p>
                 </div>
               </div>
 
@@ -4586,11 +4950,12 @@ self.addEventListener('fetch', (e) => {
     }
 
     // ==================== BOOTSTRAP ====================
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
+      await applyBrandLogoAndManifest();
       renderSavedAccountsChips();
       const savedActive = localStorage.getItem(KEYS.ACTIVE_USER);
       if (savedActive) {
-        try { completeSignIn(JSON.parse(savedActive), true); }
+        try { completeSignIn(JSON.parse(savedActive), true, false); }
         catch (e) { localStorage.removeItem(KEYS.ACTIVE_USER); }
       }
       if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
