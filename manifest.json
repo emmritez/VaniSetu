@@ -1,22 +1,45 @@
 {
-  "name": "VaniSetu - AI Based Learning App",
+  "name": "VaniSetu — Trilingual AI Language Mastery",
   "short_name": "VaniSetu",
-  "description": "Learn Smart. Speak Confidently.",
+  "description": "Learn Smart. Speak Confidently. Complete 65-Chapter English, Hindi & Sanskrit Curriculum, Visual Charts, Indian TTS, 3-Tier ShabdKosh & 100-MCQ Final Certification Exam.",
+  "version": "5.0.0",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#1e1b4b",
-  "theme_color": "#312e81",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "lang": "en-IN",
+  "categories": ["education", "books", "productivity"],
   "icons": [
     {
-      "src": "https://placehold.co/192x192/312e81/fbbf24?text=VaniSetu",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%232563eb'/%3E%3Cstop offset='100%25' stop-color='%237c3aed'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='112' fill='url(%23g)'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='210' fill='%23ffffff'%3EVS%3C/text%3E%3C/svg%3E",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "https://placehold.co/512x512/312e81/fbbf24?text=VaniSetu",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%232563eb'/%3E%3Cstop offset='100%25' stop-color='%237c3aed'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='112' fill='url(%23g)'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='210' fill='%23ffffff'%3EVS%3C/text%3E%3C/svg%3E",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "English (65 Chapters)",
+      "short_name": "English",
+      "url": "./index.html?lang=english"
+    },
+    {
+      "name": "Hindi (65 अध्याय)",
+      "short_name": "Hindi",
+      "url": "./index.html?lang=hindi"
+    },
+    {
+      "name": "Sanskrit (65 अध्याय)",
+      "short_name": "Sanskrit",
+      "url": "./index.html?lang=sanskrit"
     }
   ]
 }
